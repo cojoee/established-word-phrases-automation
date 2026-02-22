@@ -602,8 +602,9 @@ class DocumentBuilder:
         """Create a .docx file from content"""
         doc = Document()
 
-        # Add title
-        title = doc.add_heading(topic, level=0)
+        # Add title - use the established document naming convention
+        doc_heading = f"🧠 Established Truth, Principles of {topic}"
+        title = doc.add_heading(doc_heading, level=0)
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
         # Add generation timestamp
@@ -822,7 +823,21 @@ class AutomationEngine:
             logger.error(f"Could not find Drive folder {DRIVE_FOLDER_NAME}")
             return False
 
-        filename = f"{topic[:80]}.docx".replace('/', '_').replace('\\', '_')
+        # Document naming: 🧠 Established Truth, Principles of (TOPIC).docx
+        # If topic is too long for filename, use Claude to create a meaningful condensed title
+        doc_title_prefix = "🧠 Established Truth, Principles of "
+        max_topic_len = MAX_TITLE_LENGTH - len(doc_title_prefix) - 5  # 5 for ".docx"
+        if len(topic) > max_topic_len:
+            # Topic exceeds limit - create all-encompassing meaning title within limits
+            condensed, _ = self.claude._call_api(
+                [{"role": "user", "content": f'The following topic title is too long for a filename. Condense it to under {max_topic_len} characters while preserving the full meaning and essence of the topic. Do NOT make it generic or cliche — it must be all-encompassing of what the original means. Respond with ONLY the condensed title, nothing else.\n\nOriginal: {topic}'}],
+                system="You condense titles while preserving their complete meaning.",
+                max_tokens=100
+            )
+            display_topic = condensed.strip() if condensed else topic[:max_topic_len]
+        else:
+            display_topic = topic
+        filename = f"{doc_title_prefix}{display_topic}.docx".replace('/', '_').replace('\\', '_')
         drive_link = self.drive.upload_docx(docx_bytes, filename, folder_id)
         if not drive_link:
             logger.error(f"Failed to upload document for {topic}")
