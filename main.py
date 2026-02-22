@@ -432,10 +432,32 @@ class GoogleDriveAPI:
                 self.folder_cache[folder_name] = folder_id
                 return folder_id
 
-            logger.warning(f"Folder '{folder_name}' not found")
-            return None
+            logger.warning(f"Folder '{folder_name}' not found, creating it...")
+            return self.create_folder(folder_name)
         except Exception as e:
             logger.error(f"Error finding folder {folder_name}: {e}")
+            return None
+
+    def create_folder(self, folder_name: str) -> Optional[str]:
+        """Create a folder in Google Drive"""
+        if not self.service:
+            return None
+        try:
+            file_metadata = {
+                'name': folder_name,
+                'mimeType': 'application/vnd.google-apps.folder'
+            }
+            folder = self.service.files().create(
+                body=file_metadata,
+                fields='id'
+            ).execute()
+            folder_id = folder.get('id')
+            if folder_id:
+                self.folder_cache[folder_name] = folder_id
+                logger.info(f"Created Drive folder '{folder_name}' with ID: {folder_id}")
+            return folder_id
+        except Exception as e:
+            logger.error(f"Error creating folder {folder_name}: {e}")
             return None
 
     def upload_docx(self, file_content: bytes, filename: str, folder_id: str) -> Optional[str]:
