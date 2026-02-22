@@ -900,8 +900,12 @@ class AutomationEngine:
 
             logger.info(f"Found {len(entries)} entries for daily compilation")
 
+            # Format the date: "February 17, 2026"
+            today_display = datetime.now().strftime("%B %d, %Y").replace(" 0", " ")  # Remove leading zero from day
+            daily_doc_title = f"📅 Established Daily Document — {today_display}"
+
             # Compile all documents
-            all_content = f"Daily Compilation - {today}\n\n"
+            all_content = f"{daily_doc_title}\n\n"
             for entry in entries:
                 topic = self.notion.get_property_value(entry, COLUMNS["TITLE"])
                 link = self.notion.get_property_value(entry, COLUMNS["LINK"])
@@ -909,7 +913,7 @@ class AutomationEngine:
                     all_content += f"## {topic}\n[View Document]({link})\n\n"
 
             # Create .docx
-            docx_bytes = DocumentBuilder.create_docx(all_content, f"Daily Compilation - {today}")
+            docx_bytes = DocumentBuilder.create_docx(all_content, daily_doc_title)
 
             # Upload to Drive
             folder_id = self.drive.find_folder(DAILY_DRIVE_FOLDER_NAME)
@@ -917,7 +921,7 @@ class AutomationEngine:
                 logger.error(f"Could not find Drive folder {DAILY_DRIVE_FOLDER_NAME}")
                 return
 
-            filename = f"Daily_Compilation_{today}.docx"
+            filename = f"{daily_doc_title}.docx"
             drive_link = self.drive.upload_docx(docx_bytes, filename, folder_id)
 
             if not drive_link:
@@ -926,7 +930,7 @@ class AutomationEngine:
 
             # Create Notion entry in Daily Documents DB
             properties = {
-                COLUMNS["DAILY_TITLE"]: {"title": [{"type": "text", "text": {"content": f"Daily - {today}"}}]},
+                COLUMNS["DAILY_TITLE"]: {"title": [{"type": "text", "text": {"content": daily_doc_title}}]},
                 COLUMNS["DAILY_DATE"]: {"date": {"start": today}},
                 COLUMNS["DAILY_COUNT"]: {"number": len(entries)},
                 COLUMNS["DAILY_LINK"]: {"url": drive_link},
