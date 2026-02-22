@@ -306,7 +306,7 @@ class ClaudeAPI:
         self.model = model
         self.base_url = "https://api.anthropic.com/v1"
 
-    def generate_document(self, topic: str, max_tokens: int = 12000) -> tuple[Optional[str], Dict]:
+    def generate_document(self, topic: str, max_tokens: int = 64000) -> tuple[Optional[str], Dict]:
         """Generate comprehensive document for a topic using user's exact prompt"""
         user_content = USER_PROMPT_TEMPLATE.format(topic=topic)
 
@@ -346,7 +346,7 @@ class ClaudeAPI:
 
         return response, usage
 
-    def _call_api(self, messages: List[Dict], system: str = "", max_tokens: int = 12000) -> tuple[Optional[str], Dict]:
+    def _call_api(self, messages: List[Dict], system: str = "", max_tokens: int = 64000) -> tuple[Optional[str], Dict]:
         """Make API call to Claude"""
         url = f"{self.base_url}/messages"
 
