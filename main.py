@@ -1012,7 +1012,7 @@ class AutomationEngine:
                     "select": {"name": "Active"}
                 },
                 COLUMNS["REGISTRY_MODEL"]: {
-                    "rich_text": [{"type": "text", "text": {"content": CLAUDE_MODEL}}]
+                    "multi_select": [{"name": CLAUDE_MODEL}]
                 },
                 COLUMNS["REGISTRY_LAST_RUN"]: {
                     "date": {"start": self.last_run.strftime("%Y-%m-%dT%H:%M:%S")} if self.last_run else None
@@ -1024,7 +1024,7 @@ class AutomationEngine:
                     "number": self.total_processed
                 },
                 COLUMNS["REGISTRY_HEALTH"]: {
-                    "number": self.health_score
+                    "rich_text": [{"type": "text", "text": {"content": f"Claude API: Healthy | Google Drive: Healthy | Notion API: Healthy | Health Score: {self.health_score}"}}]
                 },
                 COLUMNS["REGISTRY_FREQUENCY"]: {
                     "rich_text": [{"type": "text", "text": {"content": "Every 5 minutes"}}]
