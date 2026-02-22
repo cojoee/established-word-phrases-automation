@@ -199,6 +199,12 @@ class NotionAPI:
 
         try:
             response = requests.patch(url, headers=self.headers, json=payload)
+            if response.status_code >= 400:
+                try:
+                    error_body = response.json()
+                    logger.error(f"Notion API error for page {page_id}: {response.status_code} - {error_body.get('message', 'No message')} - Code: {error_body.get('code', 'N/A')}")
+                except Exception:
+                    logger.error(f"Notion API error for page {page_id}: {response.status_code} - {response.text[:500]}")
             response.raise_for_status()
             return True
         except requests.exceptions.RequestException as e:
@@ -304,13 +310,20 @@ class ClaudeAPI:
         """Generate comprehensive document for a topic using user's exact prompt"""
         user_content = USER_PROMPT_TEMPLATE.format(topic=topic)
 
-        return self._call_api(
+        content, usage = self._call_api(
             [
                 {"role": "user", "content": user_content}
             ],
             system=SYSTEM_MESSAGE,
             max_tokens=max_tokens
         )
+
+        # Validate document length (umbrella term calls are short by design, but documents should be substantial)
+        if content and len(content.strip()) < 500:
+            logger.error(f"Document content too short ({len(content)} chars) for '{topic}', treating as failure")
+            return None, usage
+
+        return content, usage
 
     def assign_umbrella_term(self, topic: str, existing_terms: List[str], max_tokens: int = 50) -> tuple[Optional[str], Dict]:
         """Assign an umbrella term to a topic"""
@@ -367,8 +380,8 @@ class ClaudeAPI:
             if stop_reason == "max_tokens":
                 logger.warning(f"Response truncated (max_tokens reached). Output tokens: {usage['output_tokens']}")
 
-            if not content or len(content.strip()) < 500:
-                logger.error(f"Content too short ({len(content)} chars), treating as failure")
+            if not content:
+                logger.error("No content returned from Claude API")
                 return None, usage
 
             return content, usage
@@ -756,8 +769,9 @@ class AutomationEngine:
             # Process each entry
             for i, entry in enumerate(entries[:BATCH_SIZE]):
                 try:
-                    self._process_entry(entry, existing_terms)
-                    self.total_processed += 1
+                    success = self._process_entry(entry, existing_terms)
+                    if success:
+                        self.total_processed += 1
                 except Exception as e:
                     logger.error(f"Error processing entry {i}: {e}")
                     self.health_score = max(0, self.health_score - 10)
@@ -771,14 +785,14 @@ class AutomationEngine:
             self.operation_status = "Error"
             self.health_score = max(0, self.health_score - 20)
 
-    def _process_entry(self, entry: Dict, existing_terms: List[str]):
-        """Process a single entry"""
+    def _process_entry(self, entry: Dict, existing_terms: List[str]) -> bool:
+        """Process a single entry. Returns True on success, False on failure."""
         entry_id = entry.get("id")
         topic = self.notion.get_property_value(entry, COLUMNS["TITLE"])
 
         if not topic:
             logger.warning(f"Entry {entry_id} has no title")
-            return
+            return False
 
         logger.info(f"Processing: {topic}")
 
@@ -786,7 +800,7 @@ class AutomationEngine:
         content, usage = self.claude.generate_document(topic)
         if not content:
             logger.error(f"Failed to generate content for {topic}")
-            return
+            return False
 
         # Calculate cost
         input_cost = (usage["input_tokens"] / 1_000_000) * CLAUDE_INPUT_COST_PER_M
@@ -806,13 +820,13 @@ class AutomationEngine:
         folder_id = self.drive.find_folder(DRIVE_FOLDER_NAME)
         if not folder_id:
             logger.error(f"Could not find Drive folder {DRIVE_FOLDER_NAME}")
-            return
+            return False
 
         filename = f"{topic[:80]}.docx".replace('/', '_').replace('\\', '_')
         drive_link = self.drive.upload_docx(docx_bytes, filename, folder_id)
         if not drive_link:
             logger.error(f"Failed to upload document for {topic}")
-            return
+            return False
 
         # Step 5: Update Notion entry - CRITICAL: only mark as processed after Drive upload succeeded
         properties = {
@@ -820,7 +834,7 @@ class AutomationEngine:
             COLUMNS["LINK"]: {"url": drive_link},
             COLUMNS["UMBRELLA_TERM"]: {"select": {"name": umbrella_term}},
             COLUMNS["DOC_DATE"]: {"date": {"start": datetime.now().strftime("%Y-%m-%d")}},
-            COLUMNS["QUOTA_SOURCE"]: {"rich_text": [{"type": "text", "text": {"content": GOOGLE_ACCOUNT}}]}
+            COLUMNS["QUOTA_SOURCE"]: {"select": {"name": GOOGLE_ACCOUNT}}
         }
 
         update_success = self.notion.update_page_properties(entry_id, properties)
@@ -831,7 +845,7 @@ class AutomationEngine:
             update_success = self.notion.update_page_properties(entry_id, properties)
             if not update_success:
                 logger.error(f"CRITICAL: Notion update retry also FAILED for {topic}. Manual intervention needed. Drive link: {drive_link}")
-                return
+                return False
 
         # Step 6: Append content blocks to Notion page (in batches of 95)
         notion_blocks = DocumentBuilder.convert_to_notion_blocks(content)
@@ -841,6 +855,7 @@ class AutomationEngine:
             time.sleep(0.5)  # Rate limiting
 
         logger.info(f"Successfully processed {topic} - Umbrella: {umbrella_term}, Cost: ${cost:.4f}")
+        return True
 
     def compile_daily_documents(self):
         """Compile daily documents - run at 11:55 PM"""
