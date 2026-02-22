@@ -147,10 +147,12 @@ class NotionAPI:
             "Content-Type": "application/json"
         }
 
-    def query_database(self, database_id: str, filter_dict: Optional[Dict] = None, page_size: int = 100) -> List[Dict]:
-        """Query a Notion database with optional filtering"""
+    def query_database(self, database_id: str, filter_dict: Optional[Dict] = None, page_size: int = 100, max_results: int = 0) -> List[Dict]:
+        """Query a Notion database with optional filtering.
+        If max_results > 0, stop after collecting that many results (avoids paginating entire DB).
+        """
         url = f"{self.base_url}/databases/{database_id}/query"
-        payload = {"page_size": page_size}
+        payload = {"page_size": min(page_size, 100)}
         if filter_dict:
             payload["filter"] = filter_dict
 
@@ -169,6 +171,10 @@ class NotionAPI:
                 results.extend(data.get("results", []))
                 has_more = data.get("has_more", False)
                 start_cursor = data.get("next_cursor")
+
+                # Stop early if we have enough results
+                if max_results > 0 and len(results) >= max_results:
+                    break
             except requests.exceptions.RequestException as e:
                 logger.error(f"Error querying database {database_id}: {e}")
                 break
@@ -699,13 +705,21 @@ class AutomationEngine:
         self.last_run = datetime.now()
 
         try:
-            # Query unprocessed entries
+            # Query unprocessed entries that have a title (skip empty rows)
             filter_dict = {
-                "property": COLUMNS["PROCESSED"],
-                "checkbox": {"equals": False}
+                "and": [
+                    {
+                        "property": COLUMNS["PROCESSED"],
+                        "checkbox": {"equals": False}
+                    },
+                    {
+                        "property": COLUMNS["TITLE"],
+                        "title": {"is_not_empty": True}
+                    }
+                ]
             }
 
-            entries = self.notion.query_database(NOTION_DATABASE_ID, filter_dict, page_size=BATCH_SIZE)
+            entries = self.notion.query_database(NOTION_DATABASE_ID, filter_dict, page_size=BATCH_SIZE, max_results=BATCH_SIZE)
 
             if not entries:
                 logger.info("No unprocessed entries found")
@@ -714,14 +728,8 @@ class AutomationEngine:
 
             logger.info(f"Found {len(entries)} unprocessed entries, processing up to {BATCH_SIZE}")
 
-            # Get existing umbrella terms
-            all_entries = self.notion.query_database(NOTION_DATABASE_ID, page_size=100)
-            existing_terms = set(SEED_UMBRELLA_TERMS)
-            for entry in all_entries:
-                term = self.notion.get_property_value(entry, COLUMNS["UMBRELLA_TERM"])
-                if term:
-                    existing_terms.add(term)
-            existing_terms = list(existing_terms)
+            # Get existing umbrella terms (use seed terms + cached terms to avoid querying entire DB)
+            existing_terms = list(set(SEED_UMBRELLA_TERMS))
 
             # Process each entry
             for i, entry in enumerate(entries[:BATCH_SIZE]):
@@ -986,8 +994,11 @@ class AutomationEngine:
                 }
             }
 
-            self.notion.update_page_properties(REGISTRY_PAGE_ID, properties)
-            logger.info("Registry updated successfully")
+            success = self.notion.update_page_properties(REGISTRY_PAGE_ID, properties)
+            if success:
+                logger.info("Registry updated successfully")
+            else:
+                logger.warning("Registry update returned failure")
         except Exception as e:
             logger.error(f"Error updating registry: {e}")
 
