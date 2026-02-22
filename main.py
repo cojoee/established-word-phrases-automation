@@ -43,8 +43,11 @@ NOTION_DATABASE_ID = os.getenv("NOTION_DATABASE_ID", "3062967169c28172bf7bf32fe6
 DAILY_DOCUMENTS_DB_ID = os.getenv("DAILY_DOCUMENTS_DB_ID", "e612e7e887cf4462819e92c14ff7a6de")
 UMBRELLA_TERM_DOCUMENTS_DB_ID = os.getenv("UMBRELLA_TERM_DOCUMENTS_DB_ID", "9d6fd374d6ce457cbdfccb88dcf91d55")
 DRIVE_FOLDER_NAME = os.getenv("DRIVE_FOLDER_NAME", "🧠 Established Truth, Principles, Understanding")
-DAILY_DRIVE_FOLDER_NAME = os.getenv("DAILY_DRIVE_FOLDER_NAME", "Established Daily Documents")
+DRIVE_FOLDER_ID = os.getenv("DRIVE_FOLDER_ID", "")  # Direct folder ID — bypasses name search if set
+DAILY_DRIVE_FOLDER_NAME = os.getenv("DAILY_DRIVE_FOLDER_NAME", "📅 Established Daily Documents")
+DAILY_DRIVE_FOLDER_ID = os.getenv("DAILY_DRIVE_FOLDER_ID", "")  # Direct folder ID for daily docs
 UMBRELLA_DRIVE_FOLDER_NAME = os.getenv("UMBRELLA_DRIVE_FOLDER_NAME", "Established Umbrella Term Documents")
+UMBRELLA_DRIVE_FOLDER_ID = os.getenv("UMBRELLA_DRIVE_FOLDER_ID", "")
 CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "claude-sonnet-4-6")
 CLAUDE_INPUT_COST_PER_M = float(os.getenv("CLAUDE_INPUT_COST_PER_M", "3.00"))
 CLAUDE_OUTPUT_COST_PER_M = float(os.getenv("CLAUDE_OUTPUT_COST_PER_M", "15.00"))
@@ -817,8 +820,8 @@ class AutomationEngine:
         # Step 3: Create .docx file
         docx_bytes = DocumentBuilder.create_docx(content, topic)
 
-        # Step 4: Upload to Drive
-        folder_id = self.drive.find_folder(DRIVE_FOLDER_NAME)
+        # Step 4: Upload to Drive — use direct folder ID if set, otherwise search by name
+        folder_id = DRIVE_FOLDER_ID if DRIVE_FOLDER_ID else self.drive.find_folder(DRIVE_FOLDER_NAME)
         if not folder_id:
             logger.error(f"Could not find Drive folder {DRIVE_FOLDER_NAME}")
             return False
@@ -915,8 +918,8 @@ class AutomationEngine:
             # Create .docx
             docx_bytes = DocumentBuilder.create_docx(all_content, daily_doc_title)
 
-            # Upload to Drive
-            folder_id = self.drive.find_folder(DAILY_DRIVE_FOLDER_NAME)
+            # Upload to Drive — use direct folder ID if set, otherwise search by name
+            folder_id = DAILY_DRIVE_FOLDER_ID if DAILY_DRIVE_FOLDER_ID else self.drive.find_folder(DAILY_DRIVE_FOLDER_NAME)
             if not folder_id:
                 logger.error(f"Could not find Drive folder {DAILY_DRIVE_FOLDER_NAME}")
                 return
@@ -981,8 +984,8 @@ class AutomationEngine:
             # Create .docx
             docx_bytes = DocumentBuilder.create_docx(all_content, f"Umbrella Term: {umbrella_term}")
 
-            # Upload to Drive
-            folder_id = self.drive.find_folder(UMBRELLA_DRIVE_FOLDER_NAME)
+            # Upload to Drive — use direct folder ID if set, otherwise search by name
+            folder_id = UMBRELLA_DRIVE_FOLDER_ID if UMBRELLA_DRIVE_FOLDER_ID else self.drive.find_folder(UMBRELLA_DRIVE_FOLDER_NAME)
             if not folder_id:
                 logger.error(f"Could not find Drive folder {UMBRELLA_DRIVE_FOLDER_NAME}")
                 return
