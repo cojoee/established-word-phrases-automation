@@ -72,7 +72,52 @@ USER_PROMPT_TEMPLATE = """Recognize, establish truths, principles of the {topic}
 
 I want you to provide the following under each (principle, truth) you provide Pattern function principle embodiment wisdom insight through lens of Earthwalker Lover Human Builder (I am self employed, my projects usually consist of cloning existing brands, formats in existing markets and directing them to my monetization points) Person who trains in the gym for visible muscle size gain Provide Utility Provide Human Parallel Provide Insight through Parallel with understood language, subject. So parallel the information with language I understand already. Christian symbolism, Psychology, Flow of Money, Extraction of Currency, Establishment of Resources, Utilization of Established Resources & Wealth Establishment Mechanics, Mathematics, Mechanics, Symbolism, Functionality, Leverage, Incentive Structure, Systems Dynamics / Feedback Loops, Information Asymmetry, Narrative / Frame Control, Temporal Mechanics / Time Preference, Authority Structure / Hierarchy, Cybernetics, Thermodynamics, systems engineering, information technology, computer science, English — A reminder to properly align your generations: You should provide with the most relevant core truth principles wisdom relevant I believe core principles, functions and truth is what enables us to recognize patterns and better navigate the human experience. The intent of this is to expand my understanding of my own human body, function, the symbols and figures I will encounter in my personal human experience of life, the principles the earth follows and ultimate truth and ultimate truth and the deepest and highest levels of understanding possible. I want information that I can read, recognize, understand, utilize. I want to obtain the deepest and highest level of understanding known to mankind and beyond."""
 
-SYSTEM_MESSAGE = """You are generating a comprehensive educational document. Write a complete, well-structured document. You MUST complete the entire document with a proper conclusion. Plan your structure so every section is fully developed and the document ends with a complete closing. Do not leave any section unfinished."""
+SYSTEM_MESSAGE = """You are generating a comprehensive educational document. Write a complete, well-structured document. You MUST complete the entire document with a proper conclusion. Plan your structure so every section is fully developed and the document ends with a complete closing. Do not leave any section unfinished.
+
+DOCUMENT LAYOUT AND FORMATTING GUIDELINES:
+
+Structure the document as a series of numbered PRINCIPLES. For each principle, use the following layout:
+
+## PRINCIPLE [ROMAN NUMERAL]: [PRINCIPLE TITLE IN CAPS]
+### *[One-sentence truth statement in italics]*
+
+**The Truth:** [Expanded explanation of the core truth — what it means, why it matters, the deeper understanding]
+
+**Pattern / Function / Principle:** [The transferable pattern extracted from the truth — the abstract principle that applies across domains]
+
+Then provide each of the following parallels as its own bold-headed section with a substantive paragraph:
+
+**Embodiment — The Builder / The Weaver / Interlacing:**
+**Christian Symbolism:**
+**Psychology:**
+**Earthwalker / Builder:**
+**Flow of Money, Extraction of Currency, Establishment of Resources, Utilization of Established Resources & Wealth Establishment Mechanics:**
+**Mathematics:**
+**Mechanics:**
+**Symbolism:**
+**Functionality:**
+**Leverage:**
+**Incentive Structure:**
+**Systems Dynamics / Feedback Loops:**
+**Information Asymmetry:**
+**Narrative / Frame Control:**
+**Temporal Mechanics / Time Preference:**
+**Authority Structure / Hierarchy:**
+**Cybernetics:**
+**Thermodynamics:**
+**Embodiment — The Gym / Development / Visible Muscle Size:**
+**Systems Engineering:**
+**Information Technology:**
+**Computer Science:**
+**English:**
+**Deepest Insight:**
+**Transmutation / Alchemy / Chemistry:**
+
+Separate each principle with a horizontal rule (---).
+
+End the document with a ## SYNTHESIS: THE MASTER PATTERN section that weaves all principles together into a unified understanding.
+
+Each parallel section should be a full, substantive paragraph — not a sentence fragment. Draw real, specific connections to the principle being discussed. Make every parallel genuinely insightful and useful."""
 
 UMBRELLA_TERM_PROMPT_TEMPLATE = """Given the topic "{topic}", assign it to the single most fitting umbrella term.
 
