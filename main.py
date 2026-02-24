@@ -81,66 +81,84 @@ DOCUMENT LAYOUT AND FORMATTING GUIDELINES:
 Structure the document as a series of numbered PRINCIPLES. For each principle, use the following layout:
 
 ## PRINCIPLE [ROMAN NUMERAL]: [PRINCIPLE TITLE IN CAPS]
-### *[One-sentence truth statement in italics]*
+
+**Principle:** [State the principle]
+
+**Truth:** [One-sentence truth statement]
 
 **The Truth:** [Expanded explanation of the core truth — what it means, why it matters, the deeper understanding]
 
 **Pattern / Function / Principle:** [The transferable pattern extracted from the truth — the abstract principle that applies across domains]
 
-Then provide each of the following parallels as its own bold-headed section with a substantive paragraph:
+**Deepest Insight:** [The deepest, highest level of understanding of this principle]
+
+**Practical Wisdom:** [How this principle translates into actionable wisdom]
+
+Then provide each of the following parallels as its own bold-headed section with a substantive paragraph. Each established truth/principle must be expressed through EVERY one of these parallels:
 
 **Embodiment — The Builder / The Weaver / Interlacing:**
 **Christian Symbolism:**
-**Psychology:**
-**Earthwalker / Builder:**
-**Flow of Money, Extraction of Currency, Establishment of Resources, Utilization of Established Resources & Wealth Establishment Mechanics:**
-**Mathematics:**
-**Mechanics:**
 **Symbolism:**
-**Functionality:**
-**Leverage:**
-**Incentive Structure:**
+**Psychology:**
+**Narrative / Frame Control:**
+**Cybernetics:**
 **Systems Dynamics / Feedback Loops:**
-**Invisible Technology:**
+**Network Theory:**
 **Game Theory:**
 **Information Asymmetry:**
-**Narrative / Frame Control:**
-**Temporal Mechanics / Time Preference:**
-**Authority Structure / Hierarchy:**
-**Cybernetics:**
-**Data Science:**
-**Thermodynamics:**
-**Embodiment — The Gym / Development / Visible Muscle Size:**
-**Systems Engineering:**
-**Information Technology:**
-**Computer Science:**
+**Flow of Money, Extraction of Currency, Establishment of Resources, Utilization of Established Resources & Wealth Establishment Mechanics:**
+**Recognizing Principle in Reality, Abstracting It, Decomposing It Into Steps, and Expressing It In Executable Form, Step by Step:**
 **Attention Economics:**
-**Functional Decomposition:**
-**Physics:**
-**Iterative Refinement:**
-**Process Automation:**
-**Iterative Decomposition:**
-**Industrial Engineering:**
-**Process Mapping:**
-**Functional Equivalence:**
-**Functional Verification:**
-**Workflow Automation / RPA:**
-**Process Documentation:**
-**Stepwise Refinement:**
-**Functional Regression Testing:**
-**Transmutation / Alchemy / Chemistry:**
-**Business Process Management:**
-**Algorithmic Thinking:**
-**Natural Language Processing:**
-**Architecture / Structural Design:**
-**Logistics / Throughput Theory:**
-**Cognitive Task Analysis:**
-**Biomechanics:**
-**Network Theory:**
-**Task Analysis:**
-**Step by Step Instructions:**
+**Incentive Structure:**
+**Authority Structure / Hierarchy:**
+**Leverage:**
+**Temporal Mechanics / Time Preference:**
+**Invisible Technology:**
 **English:**
-**Deepest Insight:**
+**Natural Language Processing:**
+**Mathematics:**
+**Physics:**
+**Thermodynamics:**
+**Mechanics:**
+**Transmutation / Alchemy / Chemistry:**
+**Functionality:**
+**Architecture / Structural Design:**
+**Functional Decomposition:**
+**Functional Equivalence:**
+**Observed Reality, Recognized Principle Operating Within It — a pattern, a law, a mechanism, a relationship between cause and effect. Something is working, and you see why it works. Not just that it exists, but the underlying logic driving it:**
+**Isolated, Abstracted Principle — stripped away the noise and extracted core mechanism. Moved from "this specific thing works this specific way" to "this is the universal logic underneath." Principle as a standalone, transferable object:**
+**Formalized Principle into Explicit, Structured Knowledge — Translated intuitive or observed understanding into precise language, rules, codify, and logic. What was implicit becomes explicit. What was felt becomes defined. Articulate exactly what the principle is and how it functions:**
+**Decomposed Principle into Sequential, Executable Steps - Break the formalized knowledge into a procedure. Each step follows logically from the last. The principle is no longer a concept — it's an instruction set. It can be followed, step by step, repeated, and handed to someone or something else to execute:**
+**Encoded Procedure into Functional System that can be implemented - Through code, through a workflow, through an operational process. The principle can run, operate independently of ongoing attention, it produces outputs:**
+**Encoded Principle Active in Reality: Encoded principle that can be deployed, iterated, and scaled — the encoded principle that can be active in reality, producing results, refined through feedback. Established principle that originated from observing reality that acts on reality:**
+**Observation → Abstraction → Formalization → Decomposition → Implementation → Operation Principle, Logic, Codify:**
+**Systems Engineering:**
+**Computational Thinking:**
+**Computer Programming:**
+**Codify:**
+**Algorithmic Thinking:**
+**Computer Science:**
+**Data Science:**
+**Information Technology:**
+**Cognitive Task Analysis:**
+**Procedural Knowledge:**
+**Task Analysis / Functional Decomposition / Iterative Decomposition:**
+**Iterative Refinement:**
+**Stepwise Refinement:**
+**Functional Verification:**
+**Functional Regression Testing:**
+**Process Mapping:**
+**Process Documentation:**
+**Process Automation:**
+**Business Process Management:**
+**Workflow Automation / RPA:**
+**Step by Step Instructions:**
+**Industrial Engineering:**
+**Logistics / Throughput Theory:**
+**Core Mechanism:**
+**Embodiment — Earthwalker:**
+**Lover:**
+**Biomechanics:**
 
 Separate each principle with a horizontal rule (---).
 
