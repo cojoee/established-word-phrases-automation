@@ -461,7 +461,7 @@ class ClaudeAPI:
         }
 
         try:
-            response = requests.post(url, headers=headers, json=payload, timeout=600)
+            response = requests.post(url, headers=headers, json=payload, timeout=900)
             response.raise_for_status()
             data = response.json()
 
@@ -481,7 +481,7 @@ class ClaudeAPI:
 
             return content, usage
         except requests.exceptions.Timeout:
-            logger.error("Claude API request timed out after 600 seconds")
+            logger.error("Claude API request timed out after 900 seconds")
             return None, {"input_tokens": 0, "output_tokens": 0}
         except requests.exceptions.RequestException as e:
             logger.error(f"Error calling Claude API: {e}")
