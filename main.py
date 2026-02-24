@@ -70,7 +70,7 @@ SEED_UMBRELLA_TERMS = [
 # User's exact prompt
 USER_PROMPT_TEMPLATE = """Recognize, establish truths, principles of the {topic}
 
-I want you to provide the following under each (principle, truth) you provide Pattern function principle embodiment wisdom insight through lens of Earthwalker Lover Human Builder (I am self employed, my projects usually consist of cloning existing brands, formats in existing markets and directing them to my monetization points) Person who trains in the gym for visible muscle size gain Provide Utility Provide Human Parallel Provide Insight through Parallel with understood language, subject. So parallel the information with language I understand already. Christian symbolism, Psychology, Flow of Money, Extraction of Currency, Establishment of Resources, Utilization of Established Resources & Wealth Establishment Mechanics, Mathematics, Mechanics, Symbolism, Functionality, Leverage, Incentive Structure, Systems Dynamics / Feedback Loops, Information Asymmetry, Narrative / Frame Control, Temporal Mechanics / Time Preference, Authority Structure / Hierarchy, Cybernetics, Thermodynamics, systems engineering, information technology, computer science, English — A reminder to properly align your generations: You should provide with the most relevant core truth principles wisdom relevant I believe core principles, functions and truth is what enables us to recognize patterns and better navigate the human experience. The intent of this is to expand my understanding of my own human body, function, the symbols and figures I will encounter in my personal human experience of life, the principles the earth follows and ultimate truth and ultimate truth and the deepest and highest levels of understanding possible. I want information that I can read, recognize, understand, utilize. I want to obtain the deepest and highest level of understanding known to mankind and beyond."""
+I want you to provide the following under each (principle, truth) you provide Pattern function principle embodiment wisdom insight through lens of Earthwalker Lover Human Builder Weaver Interlacing (I am self employed, my projects usually consist of cloning existing brands, formats in existing markets and directing them to my monetization points) Person who trains in the gym for visible muscle size gain Provide Utility Provide Human Parallel Provide Insight through Parallel with understood language, subject. So parallel the information with language I understand already. Christian symbolism, Psychology, Flow of Money, Extraction of Currency, Establishment of Resources, Utilization of Established Resources & Wealth Establishment Mechanics, Mathematics, Mechanics, Symbolism, Functionality, Leverage, Incentive Structure, Systems Dynamics / Feedback Loops, Invisible Technology, Game Theory, Information Asymmetry, Narrative / Frame Control, Temporal Mechanics / Time Preference, Authority Structure / Hierarchy, Cybernetics, Data Science, Thermodynamics, systems engineering, information technology, computer science, Attention Economics, Functional Decomposition, Physics, Functional Decomposition, Iterative Refinement, Process Automation, Iterative Decomposition, Industrial Engineering, Process Mapping, Functional Equivalence, Functional Verification, Workflow Automation / RPA, Process Documentation, Stepwise Refinement, Functional Regression Testing, Transmutation / Alchemy / Chemistry, Business Process Management, Algorithmic Thinking, Natural Language Processing, Architecture / Structural Design, Logistics / Throughput Theory, Cognitive Task Analysis, Biomechanics, Network Theory, Task Analysis, Step by Step Instructions, English — A reminder to properly align your generations: You should provide with the most relevant core truth principles wisdom relevant I believe core principles, functions and truth is what enables us to recognize patterns and better navigate the human experience. The intent of this is to expand my understanding of my own human body, function, the symbols and figures I will encounter in my personal human experience of life, the principles the earth follows and ultimate truth and ultimate truth and the deepest and highest levels of understanding possible. I want information that I can read, recognize, understand, utilize. I want to obtain the deepest and highest level of understanding known to mankind and beyond."""
 
 SYSTEM_MESSAGE = """You are generating a comprehensive educational document. Write a complete, well-structured document. You MUST complete the entire document with a proper conclusion. Plan your structure so every section is fully developed and the document ends with a complete closing. Do not leave any section unfinished.
 
@@ -99,19 +99,46 @@ Then provide each of the following parallels as its own bold-headed section with
 **Leverage:**
 **Incentive Structure:**
 **Systems Dynamics / Feedback Loops:**
+**Invisible Technology:**
+**Game Theory:**
 **Information Asymmetry:**
 **Narrative / Frame Control:**
 **Temporal Mechanics / Time Preference:**
 **Authority Structure / Hierarchy:**
 **Cybernetics:**
+**Data Science:**
 **Thermodynamics:**
 **Embodiment — The Gym / Development / Visible Muscle Size:**
 **Systems Engineering:**
 **Information Technology:**
 **Computer Science:**
+**Attention Economics:**
+**Functional Decomposition:**
+**Physics:**
+**Iterative Refinement:**
+**Process Automation:**
+**Iterative Decomposition:**
+**Industrial Engineering:**
+**Process Mapping:**
+**Functional Equivalence:**
+**Functional Verification:**
+**Workflow Automation / RPA:**
+**Process Documentation:**
+**Stepwise Refinement:**
+**Functional Regression Testing:**
+**Transmutation / Alchemy / Chemistry:**
+**Business Process Management:**
+**Algorithmic Thinking:**
+**Natural Language Processing:**
+**Architecture / Structural Design:**
+**Logistics / Throughput Theory:**
+**Cognitive Task Analysis:**
+**Biomechanics:**
+**Network Theory:**
+**Task Analysis:**
+**Step by Step Instructions:**
 **English:**
 **Deepest Insight:**
-**Transmutation / Alchemy / Chemistry:**
 
 Separate each principle with a horizontal rule (---).
 
