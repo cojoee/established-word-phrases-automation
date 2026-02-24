@@ -5,6 +5,7 @@ Complete replica of Google Apps Script with Python/Railway
 """
 
 import os
+import re
 import json
 import time
 import logging
@@ -693,6 +694,62 @@ class DocumentBuilder:
         return blocks
 
     @staticmethod
+    def add_formatted_text(paragraph, text: str):
+        """Parse inline markdown and add properly formatted runs to a Word paragraph.
+
+        Converts:
+          ***text*** or ___text___ → bold + italic
+          **text** or __text__     → bold
+          *text* or _text_         → italic
+
+        All other text is added as plain runs. Markdown symbols are removed.
+        """
+        # Pattern matches inline markdown in order of longest delimiter first:
+        #   ***bold italic***  then  **bold**  then  *italic*
+        pattern = re.compile(
+            r'(\*\*\*(.+?)\*\*\*)'    # ***bold italic***
+            r'|(\*\*(.+?)\*\*)'       # **bold**
+            r'|(\*(.+?)\*)'           # *italic*
+        )
+
+        pos = 0
+        for match in pattern.finditer(text):
+            # Add any plain text before this match
+            if match.start() > pos:
+                paragraph.add_run(text[pos:match.start()])
+
+            if match.group(2) is not None:
+                # ***bold italic***
+                run = paragraph.add_run(match.group(2))
+                run.bold = True
+                run.italic = True
+            elif match.group(4) is not None:
+                # **bold**
+                run = paragraph.add_run(match.group(4))
+                run.bold = True
+            elif match.group(6) is not None:
+                # *italic*
+                run = paragraph.add_run(match.group(6))
+                run.italic = True
+
+            pos = match.end()
+
+        # Add any remaining plain text after last match
+        if pos < len(text):
+            paragraph.add_run(text[pos:])
+
+    @staticmethod
+    def add_formatted_paragraph(doc, text: str, style=None):
+        """Create a paragraph with proper inline formatting from markdown text.
+
+        Uses add_formatted_text to convert **bold**, *italic*, ***bold italic***
+        into proper Word formatting runs instead of writing stars literally.
+        """
+        paragraph = doc.add_paragraph(style=style)
+        DocumentBuilder.add_formatted_text(paragraph, text)
+        return paragraph
+
+    @staticmethod
     def create_docx(content: str, topic: str) -> bytes:
         """Create a .docx file from content"""
         doc = Document()
@@ -724,11 +781,11 @@ class DocumentBuilder:
             elif block['type'] == 'paragraph':
                 text = block['text'].strip()
                 if text:
-                    doc.add_paragraph(text)
+                    DocumentBuilder.add_formatted_paragraph(doc, text)
             elif block['type'] == 'bullet':
-                doc.add_paragraph(block['text'], style='List Bullet')
+                DocumentBuilder.add_formatted_paragraph(doc, block['text'], style='List Bullet')
             elif block['type'] == 'numbered':
-                doc.add_paragraph(block['text'], style='List Number')
+                DocumentBuilder.add_formatted_paragraph(doc, block['text'], style='List Number')
             elif block['type'] == 'empty':
                 doc.add_paragraph()
 
