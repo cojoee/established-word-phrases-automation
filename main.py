@@ -401,7 +401,7 @@ class ClaudeAPI:
         self.model = model
         self.base_url = "https://api.anthropic.com/v1"
 
-    def generate_document(self, topic: str, max_tokens: int = 64000) -> tuple[Optional[str], Dict]:
+    def generate_document(self, topic: str, max_tokens: int = 32000) -> tuple[Optional[str], Dict]:
         """Generate comprehensive document for a topic using user's exact prompt"""
         user_content = USER_PROMPT_TEMPLATE.format(topic=topic)
 
