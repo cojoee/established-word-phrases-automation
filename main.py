@@ -689,20 +689,80 @@ class DocumentBuilder:
         return blocks
 
     @staticmethod
+    def sanitize_for_compatibility(text: str) -> str:
+        """Replace Unicode special characters with ASCII-safe equivalents.
+
+        Some apps (e.g. ElevenReader on Android) misread UTF-8 multi-byte
+        characters as Latin-1, producing garbled output like 'â€"' instead
+        of '—'. This replaces common Unicode characters with plain ASCII
+        equivalents so the file reads correctly everywhere.
+        """
+        replacements = {
+            # Dashes
+            '\u2014': '--',   # em dash —
+            '\u2013': '-',    # en dash –
+            '\u2012': '-',    # figure dash ‒
+            '\u2015': '--',   # horizontal bar ―
+            # Quotes
+            '\u2018': "'",    # left single quote '
+            '\u2019': "'",    # right single quote '
+            '\u201C': '"',    # left double quote "
+            '\u201D': '"',    # right double quote "
+            '\u201A': ',',    # single low-9 quote ‚
+            '\u201E': '"',    # double low-9 quote „
+            # Ellipsis
+            '\u2026': '...',  # horizontal ellipsis …
+            # Spaces
+            '\u00A0': ' ',    # non-breaking space
+            '\u2002': ' ',    # en space
+            '\u2003': ' ',    # em space
+            '\u2009': ' ',    # thin space
+            # Bullets / symbols
+            '\u2022': '-',    # bullet •
+            '\u2023': '>',    # triangular bullet ‣
+            '\u25AA': '-',    # black small square ▪
+            '\u25CF': '-',    # black circle ●
+            # Arrows
+            '\u2192': '->',   # rightwards arrow →
+            '\u2190': '<-',   # leftwards arrow ←
+            '\u21D2': '=>',   # rightwards double arrow ⇒
+            # Math
+            '\u00D7': 'x',    # multiplication sign ×
+            '\u00F7': '/',    # division sign ÷
+            '\u2248': '~',    # almost equal to ≈
+            '\u2260': '!=',   # not equal to ≠
+            '\u2264': '<=',   # less-than or equal to ≤
+            '\u2265': '>=',   # greater-than or equal to ≥
+            # Other
+            '\u00A9': '(c)',  # copyright ©
+            '\u00AE': '(R)',  # registered ®
+            '\u2122': '(TM)', # trademark ™
+        }
+        for unicode_char, ascii_equiv in replacements.items():
+            text = text.replace(unicode_char, ascii_equiv)
+        return text
+
+    @staticmethod
     def create_markdown(content: str, topic: str) -> bytes:
         """Create a markdown (.md) file from content.
 
         Adds a title header and generation timestamp, then includes
         Claude's markdown content as-is (markdown formatting is native).
-        Returns UTF-8 encoded bytes ready for upload.
+        Sanitizes Unicode characters for maximum app compatibility.
+        Returns UTF-8 encoded bytes with BOM for proper encoding detection.
         """
+        # Sanitize content for cross-app compatibility
+        content = DocumentBuilder.sanitize_for_compatibility(content)
+        topic = DocumentBuilder.sanitize_for_compatibility(topic)
+
         # Build markdown document with title and timestamp
-        doc_heading = f"# 🧠 Established Truth, Principles of {topic}"
+        doc_heading = f"# Established Truth, Principles of {topic}"
         timestamp = f"*Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*"
 
         markdown_content = f"{doc_heading}\n\n{timestamp}\n\n---\n\n{content}\n\n---\n"
 
-        return markdown_content.encode('utf-8')
+        # UTF-8 BOM signals encoding to apps that don't auto-detect UTF-8
+        return b'\xef\xbb\xbf' + markdown_content.encode('utf-8')
 
     @staticmethod
     def convert_to_notion_blocks(content: str) -> List[Dict]:
