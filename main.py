@@ -5,7 +5,6 @@ Complete replica of Google Apps Script with Python/Railway
 """
 
 import os
-import re
 import json
 import time
 import logging
@@ -13,11 +12,7 @@ from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 from io import BytesIO
 import requests
-from docx import Document
-from docx.shared import Pt, Inches, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.oxml.ns import qn
-from docx.oxml import OxmlElement
+# Note: docx imports removed — documents are now saved as markdown (.md) files
 from apscheduler.schedulers.background import BackgroundScheduler
 from dotenv import load_dotenv
 
@@ -569,15 +564,15 @@ class GoogleDriveAPI:
             logger.error(f"Error creating folder {folder_name}: {e}")
             return None
 
-    def upload_docx(self, file_content: bytes, filename: str, folder_id: str) -> Optional[str]:
-        """Upload .docx file to Drive"""
+    def upload_file(self, file_content: bytes, filename: str, folder_id: str) -> Optional[str]:
+        """Upload file to Drive"""
         if not self.service:
             logger.warning("Google Drive service not initialized")
             return None
 
         try:
             file_metadata = {'name': filename, 'parents': [folder_id]}
-            media = MediaIoBaseUpload(BytesIO(file_content), mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+            media = MediaIoBaseUpload(BytesIO(file_content), mimetype='text/markdown')
 
             file = self.service.files().create(
                 body=file_metadata,
@@ -613,7 +608,7 @@ class GoogleDriveAPI:
 
 
 class DocumentBuilder:
-    """Build .docx documents from content"""
+    """Build markdown documents and Notion blocks from content"""
 
     @staticmethod
     def parse_content_to_blocks(content: str) -> List[Dict]:
@@ -694,117 +689,20 @@ class DocumentBuilder:
         return blocks
 
     @staticmethod
-    def add_formatted_text(paragraph, text: str):
-        """Parse inline markdown and add properly formatted runs to a Word paragraph.
+    def create_markdown(content: str, topic: str) -> bytes:
+        """Create a markdown (.md) file from content.
 
-        Converts:
-          ***text*** or ___text___ → bold + italic
-          **text** or __text__     → bold
-          *text* or _text_         → italic
-
-        All other text is added as plain runs. Markdown symbols are removed.
+        Adds a title header and generation timestamp, then includes
+        Claude's markdown content as-is (markdown formatting is native).
+        Returns UTF-8 encoded bytes ready for upload.
         """
-        # Pattern matches inline markdown in order of longest delimiter first:
-        #   ***bold italic***  then  **bold**  then  *italic*
-        pattern = re.compile(
-            r'(\*\*\*(.+?)\*\*\*)'    # ***bold italic***
-            r'|(\*\*(.+?)\*\*)'       # **bold**
-            r'|(\*(.+?)\*)'           # *italic*
-        )
+        # Build markdown document with title and timestamp
+        doc_heading = f"# 🧠 Established Truth, Principles of {topic}"
+        timestamp = f"*Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*"
 
-        pos = 0
-        for match in pattern.finditer(text):
-            # Add any plain text before this match
-            if match.start() > pos:
-                paragraph.add_run(text[pos:match.start()])
+        markdown_content = f"{doc_heading}\n\n{timestamp}\n\n---\n\n{content}\n\n---\n"
 
-            if match.group(2) is not None:
-                # ***bold italic***
-                run = paragraph.add_run(match.group(2))
-                run.bold = True
-                run.italic = True
-            elif match.group(4) is not None:
-                # **bold**
-                run = paragraph.add_run(match.group(4))
-                run.bold = True
-            elif match.group(6) is not None:
-                # *italic*
-                run = paragraph.add_run(match.group(6))
-                run.italic = True
-
-            pos = match.end()
-
-        # Add any remaining plain text after last match
-        if pos < len(text):
-            paragraph.add_run(text[pos:])
-
-    @staticmethod
-    def add_formatted_paragraph(doc, text: str, style=None):
-        """Create a paragraph with proper inline formatting from markdown text.
-
-        Uses add_formatted_text to convert **bold**, *italic*, ***bold italic***
-        into proper Word formatting runs instead of writing stars literally.
-        """
-        paragraph = doc.add_paragraph(style=style)
-        DocumentBuilder.add_formatted_text(paragraph, text)
-        return paragraph
-
-    @staticmethod
-    def create_docx(content: str, topic: str) -> bytes:
-        """Create a .docx file from content"""
-        doc = Document()
-
-        # Add title - use the established document naming convention
-        doc_heading = f"🧠 Established Truth, Principles of {topic}"
-        title = doc.add_heading(doc_heading, level=0)
-        title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-
-        # Add generation timestamp
-        timestamp = doc.add_paragraph(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        timestamp.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        timestamp_format = timestamp.runs[0].font
-        timestamp_format.size = Pt(10)
-        timestamp_format.color.rgb = RGBColor(128, 128, 128)
-
-        doc.add_paragraph()  # Spacing
-
-        # Parse and add content
-        blocks = DocumentBuilder.parse_content_to_blocks(content)
-
-        for block in blocks:
-            if block['type'] == 'heading_1':
-                doc.add_heading(block['text'], level=1)
-            elif block['type'] == 'heading_2':
-                doc.add_heading(block['text'], level=2)
-            elif block['type'] == 'heading_3':
-                doc.add_heading(block['text'], level=3)
-            elif block['type'] == 'paragraph':
-                text = block['text'].strip()
-                if text:
-                    DocumentBuilder.add_formatted_paragraph(doc, text)
-            elif block['type'] == 'bullet':
-                DocumentBuilder.add_formatted_paragraph(doc, block['text'], style='List Bullet')
-            elif block['type'] == 'numbered':
-                DocumentBuilder.add_formatted_paragraph(doc, block['text'], style='List Number')
-            elif block['type'] == 'empty':
-                doc.add_paragraph()
-
-        # Add horizontal rule
-        pPr = doc.add_paragraph()._element.get_or_add_pPr()
-        pBdr = OxmlElement('w:pBdr')
-        bottom = OxmlElement('w:bottom')
-        bottom.set(qn('w:val'), 'single')
-        bottom.set(qn('w:sz'), '12')
-        bottom.set(qn('w:space'), '1')
-        bottom.set(qn('w:color'), '000000')
-        pBdr.append(bottom)
-        pPr.append(pBdr)
-
-        # Save to bytes
-        doc_bytes = BytesIO()
-        doc.save(doc_bytes)
-        doc_bytes.seek(0)
-        return doc_bytes.getvalue()
+        return markdown_content.encode('utf-8')
 
     @staticmethod
     def convert_to_notion_blocks(content: str) -> List[Dict]:
@@ -966,8 +864,8 @@ class AutomationEngine:
         if not umbrella_term:
             umbrella_term = "Esotericism"  # Default fallback
 
-        # Step 3: Create .docx file
-        docx_bytes = DocumentBuilder.create_docx(content, topic)
+        # Step 3: Create markdown file
+        md_bytes = DocumentBuilder.create_markdown(content, topic)
 
         # Step 4: Upload to Drive — use direct folder ID if set, otherwise search by name
         folder_id = DRIVE_FOLDER_ID if DRIVE_FOLDER_ID else self.drive.find_folder(DRIVE_FOLDER_NAME)
@@ -975,10 +873,10 @@ class AutomationEngine:
             logger.error(f"Could not find Drive folder {DRIVE_FOLDER_NAME}")
             return False
 
-        # Document naming: 🧠 Established Truth, Principles of (TOPIC).docx
+        # Document naming: 🧠 Established Truth, Principles of (TOPIC).md
         # If topic is too long for filename, use Claude to create a meaningful condensed title
         doc_title_prefix = "🧠 Established Truth, Principles of "
-        max_topic_len = MAX_TITLE_LENGTH - len(doc_title_prefix) - 5  # 5 for ".docx"
+        max_topic_len = MAX_TITLE_LENGTH - len(doc_title_prefix) - 3  # 3 for ".md"
         if len(topic) > max_topic_len:
             # Topic exceeds limit - create all-encompassing meaning title within limits
             condensed, _ = self.claude._call_api(
@@ -989,8 +887,8 @@ class AutomationEngine:
             display_topic = condensed.strip() if condensed else topic[:max_topic_len]
         else:
             display_topic = topic
-        filename = f"{doc_title_prefix}{display_topic}.docx".replace('/', '_').replace('\\', '_')
-        drive_link = self.drive.upload_docx(docx_bytes, filename, folder_id)
+        filename = f"{doc_title_prefix}{display_topic}.md".replace('/', '_').replace('\\', '_')
+        drive_link = self.drive.upload_file(md_bytes, filename, folder_id)
         if not drive_link:
             logger.error(f"Failed to upload document for {topic}")
             return False
@@ -1064,8 +962,8 @@ class AutomationEngine:
                 if topic and link:
                     all_content += f"## {topic}\n[View Document]({link})\n\n"
 
-            # Create .docx
-            docx_bytes = DocumentBuilder.create_docx(all_content, daily_doc_title)
+            # Create markdown file
+            md_bytes = DocumentBuilder.create_markdown(all_content, daily_doc_title)
 
             # Upload to Drive — use direct folder ID if set, otherwise search by name
             folder_id = DAILY_DRIVE_FOLDER_ID if DAILY_DRIVE_FOLDER_ID else self.drive.find_folder(DAILY_DRIVE_FOLDER_NAME)
@@ -1073,8 +971,8 @@ class AutomationEngine:
                 logger.error(f"Could not find Drive folder {DAILY_DRIVE_FOLDER_NAME}")
                 return
 
-            filename = f"{daily_doc_title}.docx"
-            drive_link = self.drive.upload_docx(docx_bytes, filename, folder_id)
+            filename = f"{daily_doc_title}.md"
+            drive_link = self.drive.upload_file(md_bytes, filename, folder_id)
 
             if not drive_link:
                 logger.error("Failed to upload daily compilation")
@@ -1130,8 +1028,8 @@ class AutomationEngine:
                 if topic and link:
                     all_content += f"## {topic}\n[View Document]({link})\n\n"
 
-            # Create .docx
-            docx_bytes = DocumentBuilder.create_docx(all_content, f"Umbrella Term: {umbrella_term}")
+            # Create markdown file
+            md_bytes = DocumentBuilder.create_markdown(all_content, f"Umbrella Term: {umbrella_term}")
 
             # Upload to Drive — use direct folder ID if set, otherwise search by name
             folder_id = UMBRELLA_DRIVE_FOLDER_ID if UMBRELLA_DRIVE_FOLDER_ID else self.drive.find_folder(UMBRELLA_DRIVE_FOLDER_NAME)
@@ -1139,8 +1037,8 @@ class AutomationEngine:
                 logger.error(f"Could not find Drive folder {UMBRELLA_DRIVE_FOLDER_NAME}")
                 return
 
-            filename = f"UmbrellaTermCompilation_{umbrella_term.replace(' ', '_')}.docx"
-            drive_link = self.drive.upload_docx(docx_bytes, filename, folder_id)
+            filename = f"UmbrellaTermCompilation_{umbrella_term.replace(' ', '_')}.md"
+            drive_link = self.drive.upload_file(md_bytes, filename, folder_id)
 
             if not drive_link:
                 logger.error(f"Failed to upload umbrella term compilation for {umbrella_term}")
