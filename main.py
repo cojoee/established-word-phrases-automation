@@ -438,13 +438,18 @@ class ClaudeAPI:
         return response, usage
 
     def _call_api(self, messages: List[Dict], system: str = "", max_tokens: int = 64000) -> tuple[Optional[str], Dict]:
-        """Make API call to Claude"""
+        """Make API call to Claude using streaming to prevent timeouts.
+
+        Streaming keeps the connection alive as text chunks arrive,
+        preventing idle-read timeouts on long document generations.
+        """
         url = f"{self.base_url}/messages"
 
         payload = {
             "model": self.model,
             "max_tokens": max_tokens,
-            "messages": messages
+            "messages": messages,
+            "stream": True
         }
 
         if system:
@@ -457,16 +462,66 @@ class ClaudeAPI:
         }
 
         try:
-            response = requests.post(url, headers=headers, json=payload, timeout=900)
+            # connect timeout 30s, read timeout 1200s (20 min safety net)
+            response = requests.post(
+                url, headers=headers, json=payload,
+                timeout=(30, 1200), stream=True
+            )
             response.raise_for_status()
-            data = response.json()
 
-            content = data.get("content", [{}])[0].get("text", "")
-            stop_reason = data.get("stop_reason", "unknown")
-            usage = {
-                "input_tokens": data.get("usage", {}).get("input_tokens", 0),
-                "output_tokens": data.get("usage", {}).get("output_tokens", 0)
-            }
+            # Parse Server-Sent Events stream
+            content_parts = []
+            usage = {"input_tokens": 0, "output_tokens": 0}
+            stop_reason = "unknown"
+            chunks_received = 0
+
+            for line in response.iter_lines(decode_unicode=True):
+                if not line or not line.startswith("data: "):
+                    continue
+
+                data_str = line[6:]  # Remove "data: " prefix
+                if data_str.strip() == "[DONE]":
+                    break
+
+                try:
+                    data = json.loads(data_str)
+                    event_type = data.get("type", "")
+
+                    if event_type == "content_block_delta":
+                        delta = data.get("delta", {})
+                        if delta.get("type") == "text_delta":
+                            content_parts.append(delta.get("text", ""))
+                            chunks_received += 1
+                            # Log progress every 200 chunks
+                            if chunks_received % 200 == 0:
+                                logger.info(f"Streaming: received {chunks_received} chunks, ~{sum(len(p) for p in content_parts)} chars so far")
+
+                    elif event_type == "message_start":
+                        msg = data.get("message", {})
+                        msg_usage = msg.get("usage", {})
+                        if msg_usage:
+                            usage["input_tokens"] = msg_usage.get("input_tokens", 0)
+
+                    elif event_type == "message_delta":
+                        delta = data.get("delta", {})
+                        stop_reason = delta.get("stop_reason", stop_reason)
+                        msg_usage = data.get("usage", {})
+                        if msg_usage:
+                            usage["output_tokens"] = msg_usage.get("output_tokens", usage["output_tokens"])
+
+                    elif event_type == "error":
+                        error_msg = data.get("error", {}).get("message", "Unknown stream error")
+                        logger.error(f"Claude API stream error: {error_msg}")
+                        response.close()
+                        return None, usage
+
+                except json.JSONDecodeError:
+                    continue
+
+            response.close()
+            content = "".join(content_parts)
+
+            logger.info(f"Streaming complete: {chunks_received} chunks, {len(content)} chars, stop_reason={stop_reason}")
 
             if stop_reason == "max_tokens":
                 logger.warning(f"Response truncated (max_tokens reached). Output tokens: {usage['output_tokens']}")
@@ -477,7 +532,10 @@ class ClaudeAPI:
 
             return content, usage
         except requests.exceptions.Timeout:
-            logger.error("Claude API request timed out after 900 seconds")
+            logger.error("Claude API request timed out (connect or read timeout exceeded)")
+            return None, {"input_tokens": 0, "output_tokens": 0}
+        except requests.exceptions.ConnectionError as e:
+            logger.error(f"Claude API connection error: {e}")
             return None, {"input_tokens": 0, "output_tokens": 0}
         except requests.exceptions.RequestException as e:
             logger.error(f"Error calling Claude API: {e}")
@@ -878,18 +936,23 @@ class AutomationEngine:
             existing_terms = list(set(SEED_UMBRELLA_TERMS))
 
             # Process each entry
+            attempted = min(len(entries), BATCH_SIZE)
+            succeeded = 0
             for i, entry in enumerate(entries[:BATCH_SIZE]):
                 try:
                     success = self._process_entry(entry, existing_terms)
                     if success:
                         self.total_processed += 1
+                        succeeded += 1
+                    else:
+                        logger.warning(f"Entry {i+1}/{attempted} failed — will be retried next cycle")
                 except Exception as e:
-                    logger.error(f"Error processing entry {i}: {e}")
+                    logger.error(f"Error processing entry {i+1}/{attempted}: {e}")
                     self.health_score = max(0, self.health_score - 10)
 
             self.operation_status = "Idle"
             self._update_registry()
-            logger.info(f"Processing cycle complete. Processed {min(len(entries), BATCH_SIZE)} entries")
+            logger.info(f"Processing cycle complete. {succeeded}/{attempted} entries succeeded")
 
         except Exception as e:
             logger.error(f"Error in processing cycle: {e}")
