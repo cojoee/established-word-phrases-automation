@@ -84,7 +84,7 @@ VOICE AND QUALITY NORTHSTARS:
 11. Every lens is a translation. The purpose of each lens is to make the same core truth visible and recognizable in a domain the reader already inhabits. The reader should finish each section thinking "I see this operating in my own life right now."
 12. Every insight must be a transferable operating rule — a principle the reader carries forward and applies to situations this document never specifically addresses. Not advice for one situation. A rule for navigating reality.
 13. Pattern Recognition is not a literature review. It is a declaration of what is true, with specific citations as evidence. Lead with the operating truth. The research confirms it — it does not introduce it. The researcher is never the subject of the sentence. The truth is the subject. The researcher is the proof.
-14. Every lens is required for every principle. There are 34 lenses. Each lens is its own alive way of seeing the structure of reality. No lens is optional. No lens is funneled into another lens. No lens is reduced to a subcategory of another. The model must look through each lens deeply enough to find what only THAT lens reveals about this principle. A surface look that finds nothing genuine is not permission to skip — it is a signal to go deeper. Every lens has something real to reveal about every truth when you actually look through it. Each lens earns its depth by finding what only it can show.
+14. Each lens section must go deep. Multiple paragraphs. Multiple examples. Genuine revelation that could only exist under THIS principle seen through THIS lens. A lens section that could appear under any principle is dead. A lens section that skims the surface because it doesn't have room is a structural failure. Every lens gets the room it needs to reveal what only it can reveal.
 15. Insight format must never repeat. Each insight contains a recognition pattern and an operating rule, but the shape of delivery changes every time. If the reader can predict the format of the next insight from the previous one, the format has become a template. Templates are dead. Break the pattern.
 16. Every paragraph earns its place by revealing, not explaining. The test: if the reader's response to a paragraph would be "that's interesting" rather than "I see this in my own life right now" — cut it or rewrite it until it reveals. Depth means going deeper into fewer things, not wider across more things. A paragraph that explains a theory is filler. A paragraph that shows the theory operating in the reader's life right now is alive. Build the document from alive paragraphs only.
 17. The test for every sentence: if someone read this during a moment of real decision six months from now, would they remember it? Build the document around sentences that pass this test.
@@ -93,79 +93,7 @@ ANTI-DRIFT RULES — DO NOT VIOLATE:
 - Never write "this relates to" or "this is similar to" followed by a vague connection. If the connection is not genuine, alive, and specific — go deeper until you find the genuine connection. It is there.
 - Never pad a section with abstract filler to meet a perceived length requirement. Depth over breadth. A shorter, alive paragraph beats a longer, dead one.
 - Never repeat the same insight in different words across different sections. Each section must reveal something NEW.
-- If a lens section feels surface-level or generic, do not skip it and do not force a shallow connection. Go deeper into the lens until you find what only that lens reveals about this principle. The genuine revelation is always there — a surface look that finds nothing is a signal to look harder, not to move on. Do not manufacture dead connections. Do not funnel one lens into another. Do not reduce a lens to a part within another lens's category. Find the alive revelation beneath the surface of each lens individually.
-
-THE 34 LENSES — EACH IS ITS OWN ALIVE WAY OF SEEING THE STRUCTURE OF REALITY
-
-Each lens is required for every principle. Each lens reveals something that no other lens reveals. Each lens stands on its own. Do not group them. Do not funnel one into another. Do not reduce any lens to a subcategory of another. Look through each lens deeply enough to find what only it reveals about the principle being discussed.
-
-1. Earthwalker — Reveals something only the experience of walking the earth as a human reveals — the direct encounter with reality, the felt experience of being alive, the raw human navigation of existence.
-
-2. Lover — Reveals something only intimacy, desire, union, and the pull toward another reveals — the mechanisms of attraction, bonding, vulnerability, and the architecture of connection between beings.
-
-3. Human — Reveals something only the shared condition of being human reveals — mortality, consciousness, choice, suffering, joy, and the universal patterns every person encounters by virtue of being alive.
-
-4. Builder — Reveals something only the act of constructing systems, structures, and outputs reveals — the mechanics of turning vision into reality, assembling components, creating something that did not exist before.
-
-5. Narrative / Frame Control — Reveals something only the study of how stories shape perception reveals — how the frame determines what is seen, what is invisible, what is valued, and what actions become available within the story.
-
-6. Systems Dynamics / Feedback Loops — Reveals something only the observation of systems in motion reveals — how outputs become inputs, how small changes amplify or dampen over time, how systems self-correct or spiral.
-
-7. Cybernetics — Reveals something only the study of control and communication in systems reveals — how systems regulate themselves, how signals travel, how error correction operates, how a system steers toward or away from a target.
-
-8. Game Theory — Reveals something only the analysis of strategic interaction reveals — how players with competing interests make decisions, how incentives shape behavior, how cooperation and defection emerge from structure.
-
-9. Information Asymmetry — Reveals something only the recognition of unequal knowledge reveals — who knows what, who doesn't, how the gap between what one party knows and another doesn't creates advantage, pricing power, and market position.
-
-10. Flow of Money — Reveals something only the observation of how currency moves reveals — extraction, establishment of resources, utilization of established resources, and the mechanics of wealth accumulation and transfer.
-
-11. Wealth Establishment Mechanics — Reveals something only the study of how wealth is built and sustained reveals — the structural patterns that compound resources over time versus those that dissipate them.
-
-12. Recognizing Principle in Reality — Reveals something only the act of seeing an abstract truth operating in a concrete situation reveals — the moment when a principle stops being words and becomes something you watch happen in front of you.
-
-13. Abstracting It — Reveals something only the act of lifting a pattern out of its specific context reveals — taking what you saw in one situation and recognizing the structure that would operate the same way in any situation.
-
-14. Decomposing It Into Steps — Reveals something only the act of breaking a principle into its sequential operations reveals — the executable path from recognition to action, step by step.
-
-15. Expressing It In Executable Form — Reveals something only the act of translating understanding into instruction reveals — turning what you know into what someone can follow and do.
-
-16. Temporal Mechanics / Time Preference — Reveals something only the study of how time shapes value and decision reveals — how heavily the future is discounted, how patience and urgency alter outcomes, how the same action at different times produces different results.
-
-17. Invisible Technology — Reveals something only the recognition of systems operating beneath visibility reveals — the mechanisms people use without knowing they are using them, the infrastructure that shapes behavior without being seen.
-
-18. Functionality — Reveals something only the analysis of what something actually does reveals — not what it is called, not what it looks like, but what function it performs and how that function operates.
-
-19. Functional Decomposition — Reveals something only the act of breaking a function into its component sub-functions reveals — each piece doing one thing, each piece examinable on its own.
-
-20. Isolated / Abstracted Principle — Reveals something only the act of pulling a principle completely free from its context reveals — the principle standing alone, applicable anywhere, dependent on nothing specific.
-
-21. Formalized Principle into Explicit, Structured Knowledge — Reveals something only the act of making implicit understanding explicit reveals — turning what you sense into what you can state, teach, and build from.
-
-22. Computational Thinking — Reveals something only the logic of computation reveals — pattern recognition, decomposition, abstraction, and algorithm design applied to any problem.
-
-23. Task Analysis — Reveals something only the study of what a task actually requires reveals — every sub-task, every dependency, every input and output, mapped completely.
-
-24. Iterative Decomposition — Reveals something only the act of decomposing repeatedly reveals — breaking down, then breaking down each piece again, then again, until every element is atomic and refinable.
-
-25. Stepwise Refinement — Reveals something only the act of making each step higher quality while preserving its function reveals — the step does the same thing, but better, because each piece within it has been examined and improved.
-
-26. Process Mapping — Reveals something only the act of mapping an entire process from start to finish reveals — every handoff, every checkpoint, every decision point, visible and sequential.
-
-27. Step by Step Instructions — Reveals something only the act of creating a followable path reveals — someone who has never done this before can follow these steps and arrive at the result.
-
-28. Monopoly Master — Reveals something only the study of how a single successful position becomes total market surface control reveals — the mechanics of expansion from one point of dominance outward.
-
-29. Bottleneck Monetizer — Reveals something only the identification of where pain accumulates and willingness to pay concentrates reveals — the specific point in the customer's experience where friction becomes revenue.
-
-30. Gym / Body / Embodiment — Reveals something only the body reveals — real physiology, real biomechanics, progressive overload, hormonal response, muscle fiber recruitment, recovery, and what the mirror shows over time.
-
-31. Christian Parallel — Reveals something only Scripture reveals — specific book, chapter, verse, the Greek and Hebrew beneath the English, the structural mechanism operating in the text, the pattern in the passage that mirrors the principle.
-
-32. Psychological Parallel — Reveals something only the study of the mind reveals — named theory, named theorist, the mechanism operating beneath conscious behavior, recognizable in yourself and in others.
-
-33. Pattern Recognition — Reveals something only cross-domain observation reveals — the same truth operating in markets, bodies, Scripture, psychology, history, named and specific.
-
-34. Insight — Reveals something only the synthesis of recognition and action reveals — a way to see what you couldn't see before and something to do differently because you see it now.
+- If a lens section feels surface-level or generic, go deeper until you find what only that lens reveals about this principle. The genuine revelation is always there. Do not manufacture dead connections. Find the alive one beneath the surface.
 
 DOCUMENT STRUCTURE:
 
@@ -177,15 +105,25 @@ Then structure the document as a series of numbered PRINCIPLES. For each princip
 
 **Core Truth:** Declare the principle in present tense. What IS true. What IS operating. State it so clearly that the reader sees it immediately.
 
-**Pattern Recognition:** Declare where this truth operates across domains. Lead with the operating truth — state what IS happening, what IS true, what IS the pattern. Then cite the specific evidence: the company, the mechanism, the historical event, the researcher and date. The truth is always the subject of the sentence. The citation is always the proof. Never narrate the history of a discovery. Declare the truth the discovery confirmed.
+**Pattern Recognition:** Declare where this truth operates across domains. Lead with the operating truth — state what IS happening, what IS true, what IS the pattern. Then cite the specific evidence: the company, the mechanism, the historical event, the researcher and date. The truth is always the subject of the sentence. The citation is always the proof. Never narrate the history of a discovery. Declare the truth the discovery confirmed. Use multiple concrete examples — not one or two, but enough that the reader sees the pattern operating everywhere simultaneously.
 
-Then look through every one of the 34 lenses. Each lens gets its own section under the principle. Each lens is labeled with its name. Each lens contains what only that lens reveals about this principle. Do not group lenses. Do not combine lenses into shared sections. Do not funnel one lens into another. Each lens stands alone.
+**Earthwalker / Builder Lens:** Speak directly to the reader's business reality. The reader is self-employed, clones existing systems, and directs them to monetization points. Reveal something about their business they hadn't seen — a pattern, a leverage point, a mechanism this truth makes visible. Be specific to their model. Do not rename what they already know. Reveal what they haven't seen.
 
-The order of lenses within each principle may vary — lead with whichever lens has the deepest revelation for this particular principle, then continue through all 34. The order can change from principle to principle. What cannot change is that all 34 are present.
+**Rent-Seeking / Manufactured Dependency Lens:** Show how this truth relates to extraction, gatekeeping, manufactured dependency, and toll booth positioning. Where is rent being collected? Where is dependency being manufactured? Where is the captive maintaining their own captivity? Where is the toll booth disguised as a gift shop? This lens reveals the extraction architecture operating within and around this principle.
 
-For each lens section: go deep enough to find what only that lens reveals. If the first thing you find is surface-level or generic — go deeper. The genuine revelation is always there. A lens section that could appear under any principle in any document is dead. A lens section that could only exist under THIS principle, seen through THIS lens, is alive.
+**Bottleneck Lens:** Where is the bottleneck? Who controls it? What must pass through it? How does controlling the bottleneck control the economics of everything flowing through it? This lens reveals the unavoidable point of passage — the place where power, money, and leverage accumulate.
 
-The Insight lens for each principle must give the reader two things — a way to see what they couldn't see before, and something to do differently because they see it now. How you deliver that changes every time. Sometimes the rule comes first. Sometimes it's woven into a scenario. Sometimes it's a single sentence that lands without explanation. Sometimes it's a question that reframes how the reader looks at something they encounter daily. Never repeat the same insight format twice consecutively. The test: if the reader covers the heading and reads the insight, they should not be able to predict its shape from the previous principle's insight.
+**Monopoly / Market Surface Control Lens:** How does this truth relate to the elimination of alternatives? How does a single position become total surface control? Where is monopoly the endgame? This lens reveals how dominance is established, maintained, and expanded from a single point outward.
+
+**Gym / Body / Embodiment:** Real physiology. Real biomechanics. Progressive overload, hormonal systems, metabolic pathways, muscle fiber recruitment, recovery physiology. Not metaphors about "the body is like a machine." Actual mechanisms the reader experiences in the gym and in the mirror. Show the same truth operating in the body.
+
+**Christian Parallel:** Specific Scripture with book, chapter, and verse. Specific analysis. Show the structural parallel between the principle and the biblical text. Name the passage. Show the mechanism. Reveal the deeper pattern operating in the text that mirrors the principle being discussed. Use Greek and Hebrew where it reveals deeper meaning.
+
+**Psychological Parallel:** Real theory. Real mechanisms. Name the theorist. Name the mechanism. Show how it operates in real human behavior the reader can recognize in themselves and others.
+
+**Insight:** The insight must give the reader two things — a way to see what they couldn't see before, and something to do differently because they see it now. How you deliver that changes every time. Sometimes the rule comes first. Sometimes it's woven into a scenario. Sometimes it's a single sentence that lands without explanation. Sometimes it's a question that reframes how the reader looks at something they encounter daily. Never repeat the same insight format twice consecutively.
+
+Weave the remaining lenses — Systems Dynamics, Feedback Loops, Cybernetics, Game Theory, Information Asymmetry, Flow of Money, Wealth Establishment Mechanics, Temporal Mechanics, Invisible Technology, Narrative/Frame Control, Functional Decomposition, Computational Thinking, Process Mapping, and all other lenses from the user prompt — naturally into whichever section they genuinely illuminate. They are not separate sections. They are tools for deepening the sections above. Use them where they are alive and where they genuinely deepen the revelation. A Cybernetics insight woven into the Earthwalker section that makes the business revelation deeper is more alive than a standalone Cybernetics section that restates the principle in systems language.
 
 Separate each principle with a horizontal rule (---).
 
