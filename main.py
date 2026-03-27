@@ -1014,8 +1014,59 @@ class AutomationEngine:
         logger.info(f"Successfully processed {topic} - Umbrella: {umbrella_term}, Cost: ${cost:.4f}")
         return True
 
+    def _extract_rich_text(self, rich_text_array: List[Dict]) -> str:
+        """Extract plain text from a Notion rich_text array, preserving markdown formatting.
+        Concatenates all text segments. Handles empty arrays gracefully."""
+        if not rich_text_array:
+            return ""
+        parts = []
+        for segment in rich_text_array:
+            text = segment.get("text", {}).get("content", "") if segment.get("type") == "text" else segment.get("plain_text", "")
+            if not text:
+                text = segment.get("plain_text", "")
+            parts.append(text)
+        return "".join(parts)
+
+    def _blocks_to_markdown(self, blocks: List[Dict]) -> str:
+        """Convert a list of Notion blocks back to markdown text.
+        Handles: heading_1, heading_2, heading_3, paragraph, bulleted_list_item,
+        numbered_list_item, divider, and empty paragraphs."""
+        lines = []
+        for block in blocks:
+            block_type = block.get("type", "")
+            try:
+                if block_type == "heading_1":
+                    text = self._extract_rich_text(block["heading_1"].get("rich_text", []))
+                    lines.append(f"# {text}\n")
+                elif block_type == "heading_2":
+                    text = self._extract_rich_text(block["heading_2"].get("rich_text", []))
+                    lines.append(f"## {text}\n")
+                elif block_type == "heading_3":
+                    text = self._extract_rich_text(block["heading_3"].get("rich_text", []))
+                    lines.append(f"### {text}\n")
+                elif block_type == "paragraph":
+                    text = self._extract_rich_text(block["paragraph"].get("rich_text", []))
+                    lines.append(f"{text}\n")
+                elif block_type == "bulleted_list_item":
+                    text = self._extract_rich_text(block["bulleted_list_item"].get("rich_text", []))
+                    lines.append(f"- {text}")
+                elif block_type == "numbered_list_item":
+                    text = self._extract_rich_text(block["numbered_list_item"].get("rich_text", []))
+                    lines.append(f"1. {text}")
+                elif block_type == "divider":
+                    lines.append("---\n")
+                else:
+                    # Unknown block type — skip silently
+                    pass
+            except Exception as e:
+                logger.warning(f"Error converting block type {block_type}: {e}")
+                continue
+        return "\n".join(lines)
+
     def compile_daily_documents(self):
-        """Compile daily documents - run at 11:55 PM"""
+        """Compile daily documents - run at 11:55 PM.
+        Retrieves the FULL CONTENT of every document processed today from Notion
+        and compiles it into one continuous markdown file for ElevenReader consumption."""
         logger.info("Starting daily compilation...")
 
         try:
@@ -1046,16 +1097,51 @@ class AutomationEngine:
             today_display = datetime.now().strftime("%B %d, %Y").replace(" 0", " ")  # Remove leading zero from day
             daily_doc_title = f"📅 Established Daily Document — {today_display}"
 
-            # Compile all documents
-            all_content = f"{daily_doc_title}\n\n"
+            # Compile all documents — full content from each Notion page
+            all_content = f"# {daily_doc_title}\n\n**Documents Compiled:** {len(entries)}\n\n---\n\n"
+
+            compiled_count = 0
             for entry in entries:
                 topic = self.notion.get_property_value(entry, COLUMNS["TITLE"])
                 link = self.notion.get_property_value(entry, COLUMNS["LINK"])
-                if topic and link:
-                    all_content += f"## {topic}\n[View Document]({link})\n\n"
+                entry_id = entry["id"]
 
-            # Create markdown file
-            md_bytes = DocumentBuilder.create_markdown(all_content, daily_doc_title)
+                if not topic:
+                    continue
+
+                logger.info(f"Compiling content for: {topic}")
+
+                # Add topic header
+                all_content += f"# 🧠 Established Truth, Principles of {topic}\n\n"
+                all_content += f"**Original Topic:** {topic}\n\n"
+
+                # Retrieve full content blocks from the Notion page
+                try:
+                    blocks = self.notion.get_block_children(entry_id)
+                    if blocks:
+                        content_md = self._blocks_to_markdown(blocks)
+                        all_content += content_md
+                    else:
+                        all_content += "(Content could not be retrieved from Notion)\n\n"
+                        if link:
+                            all_content += f"[View on Google Drive]({link})\n\n"
+                except Exception as e:
+                    logger.error(f"Error retrieving content for {topic}: {e}")
+                    all_content += "(Content could not be retrieved from Notion)\n\n"
+                    if link:
+                        all_content += f"[View on Google Drive]({link})\n\n"
+
+                all_content += "\n---\n\n"
+                compiled_count += 1
+
+            logger.info(f"Compiled content from {compiled_count} documents")
+
+            # Sanitize for ElevenReader compatibility
+            all_content = DocumentBuilder.sanitize_for_compatibility(all_content)
+
+            # Create markdown file with UTF-8 BOM
+            content_with_bom = '\ufeff' + all_content
+            md_bytes = content_with_bom.encode('utf-8')
 
             # Upload to Drive — use direct folder ID if set, otherwise search by name
             folder_id = DAILY_DRIVE_FOLDER_ID if DAILY_DRIVE_FOLDER_ID else self.drive.find_folder(DAILY_DRIVE_FOLDER_NAME)
@@ -1074,13 +1160,13 @@ class AutomationEngine:
             properties = {
                 COLUMNS["DAILY_TITLE"]: {"title": [{"type": "text", "text": {"content": daily_doc_title}}]},
                 COLUMNS["DAILY_DATE"]: {"date": {"start": today}},
-                COLUMNS["DAILY_COUNT"]: {"number": len(entries)},
+                COLUMNS["DAILY_COUNT"]: {"number": compiled_count},
                 COLUMNS["DAILY_LINK"]: {"url": drive_link},
                 COLUMNS["DAILY_STATUS"]: {"select": {"name": "Complete"}}
             }
 
             self.notion.create_page(DAILY_DOCUMENTS_DB_ID, properties)
-            logger.info(f"Daily compilation complete: {len(entries)} documents")
+            logger.info(f"Daily compilation complete: {compiled_count} documents, full content compiled")
 
         except Exception as e:
             logger.error(f"Error in daily compilation: {e}")
