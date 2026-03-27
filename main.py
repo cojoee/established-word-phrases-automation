@@ -49,6 +49,7 @@ CLAUDE_INPUT_COST_PER_M = float(os.getenv("CLAUDE_INPUT_COST_PER_M", "3.00"))
 CLAUDE_OUTPUT_COST_PER_M = float(os.getenv("CLAUDE_OUTPUT_COST_PER_M", "15.00"))
 MAX_TITLE_LENGTH = int(os.getenv("MAX_TITLE_LENGTH", "150"))
 BATCH_SIZE = int(os.getenv("BATCH_SIZE", "5"))
+PROCESSING_INTERVAL_MINUTES = int(os.getenv("PROCESSING_INTERVAL_MINUTES", "5"))
 REGISTRY_PAGE_ID = os.getenv("REGISTRY_PAGE_ID", "30729671-69c2-81f9-aaf9-edbbe03eee96")
 OPERATION_NAME = os.getenv("OPERATION_NAME", "Established Truth, Principles Automation")
 GOOGLE_ACCOUNT = os.getenv("GOOGLE_ACCOUNT", "codyandersonnexus@gmail.com")
@@ -1314,7 +1315,7 @@ def start_scheduler():
     scheduler.add_job(
         engine.process_unprocessed_entries,
         'interval',
-        minutes=5,
+        minutes=PROCESSING_INTERVAL_MINUTES,
         id='main_processing',
         name='Main Processing Loop'
     )
