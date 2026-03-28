@@ -880,11 +880,27 @@ class AutomationEngine:
         self.notion = NotionAPI(NOTION_API_KEY)
         self.claude = ClaudeAPI(CLAUDE_API_KEY, CLAUDE_MODEL)
         self.drive = GoogleDriveAPI(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN)
-        self.monthly_cost = 0.0
-        self.total_processed = 0
         self.last_run = None
         self.operation_status = "Idle"
         self.health_score = 100
+
+        # Restore counters from registry so they survive deploys
+        self.monthly_cost = 0.0
+        self.total_processed = 0
+        try:
+            registry_page = self.notion.get_page(REGISTRY_PAGE_ID)
+            if registry_page:
+                props = registry_page.get("properties", {})
+                saved_total = props.get(COLUMNS["REGISTRY_TOTAL"], {}).get("number")
+                saved_cost = props.get(COLUMNS["REGISTRY_COST"], {}).get("number")
+                if saved_total is not None:
+                    self.total_processed = saved_total
+                    logger.info(f"Restored total_processed from registry: {self.total_processed}")
+                if saved_cost is not None:
+                    self.monthly_cost = saved_cost
+                    logger.info(f"Restored monthly_cost from registry: {self.monthly_cost}")
+        except Exception as e:
+            logger.warning(f"Could not restore counters from registry: {e}. Starting from 0.")
 
     def process_unprocessed_entries(self):
         """Main processing loop - runs every 5 minutes"""
@@ -1298,7 +1314,7 @@ class AutomationEngine:
                     "rich_text": [{"type": "text", "text": {"content": f"Claude API: Healthy | Google Drive: Healthy | Notion API: Healthy | Health Score: {self.health_score}"}}]
                 },
                 COLUMNS["REGISTRY_FREQUENCY"]: {
-                    "rich_text": [{"type": "text", "text": {"content": "Every 5 minutes"}}]
+                    "rich_text": [{"type": "text", "text": {"content": f"Every {PROCESSING_INTERVAL_MINUTES} minutes (BATCH_SIZE={BATCH_SIZE})"}}]
                 }
             }
 
