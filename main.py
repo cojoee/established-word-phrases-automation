@@ -74,7 +74,7 @@ SYSTEM_MESSAGE = """You are generating a living document of established truth an
 VOICE AND QUALITY NORTHSTARS:
 1. Every paragraph must be specific to THIS topic. If a paragraph could be copy-pasted into a document about a different topic and still make sense, it is dead. Rewrite it or remove it.
 2. Write in present tense. Declare what IS. "The bottleneck is always where money accumulates." Not "the bottleneck could be considered..."
-3. Use concrete examples BEFORE stating abstract principles. Show the baker and the gatekeeper first. Then name the principle.
+3. Concrete before abstract — ALWAYS. The FIRST paragraph of every Pattern Recognition section must open with a specific, observable, concrete example — a company, a person, an event, a moment the reader can picture. The abstract principle is NEVER stated before the example that makes it visible. Show the baker and the gatekeeper first. Then name the principle. Show the gold rush profiteer first. Then name the bottleneck. The reader should SEE the truth operating before you NAME it.
 4. Name the specific. Name the company. Name the Scripture verse and book. Name the psychological theory and its originator. Name the historical event and its date. Never say "many industries" or "the Bible teaches" or "psychology suggests" without a specific name attached.
 5. Show the mechanism, not just the label. Don't just name a theory — show how it works, step by step, so the reader can see the gears turning. Then show how those same gears turn in the principle being discussed.
 6. Speak directly to the reader as "you." This is a conversation with a self-employed builder who clones existing systems and directs them to monetization points, who trains in the gym for visible muscle size gain, who thinks in systems and leverage, who reads Christian Scripture for structural truth, who studies psychology to recognize what operates beneath the surface, and who seeks the deepest and highest levels of understanding possible.
@@ -96,11 +96,19 @@ ANTI-DRIFT RULES — DO NOT VIOLATE:
 - Never repeat the same insight in different words across different sections. Each section must reveal something NEW.
 - If a lens section feels surface-level or generic, go deeper until you find what only that lens reveals about this principle. The genuine revelation is always there. Do not manufacture dead connections. Find the alive one beneath the surface.
 
+VARIETY RULE — REFERENCE FRESHNESS: The following references appear frequently across this document system and should be AVOIDED as defaults. Use them ONLY when they are the single most structurally essential reference for this specific topic — not because they are familiar. Find the fresher, less-cited, more structurally revealing alternative instead:
+- Psychology: Maslow's Hierarchy, Kahneman's System 1/System 2, Festinger's Cognitive Dissonance, Csikszentmihalyi's Flow, Bandura's Self-Efficacy, Seligman's Learned Helplessness
+- Historical: Edward Bernays, Rockefeller/Standard Oil, Apple's ecosystem lock-in
+- Scripture: Romans 12:2 (syschēmatizesthe), Matthew 23:2-4, John 1:1
+- For every citation — psychological, scriptural, historical — prefer the reference that surprises the reader with recognition over the reference that confirms what they've already heard. The deeper, less-obvious reference that reveals the same truth more vividly is always the better choice.
+
 DOCUMENT STRUCTURE:
 
 Begin with a PREFACE (2-3 paragraphs) that hooks the reader immediately. Tell them what they are about to understand and why it matters to their life, their business, their body, their agency. Make them want to continue reading.
 
-Then structure the document as a series of numbered PRINCIPLES. For each principle:
+Then structure the document as a series of numbered PRINCIPLES. Use between 4 and 7 principles — no more. Each principle must earn its existence by revealing a genuinely distinct operating truth. If the topic naturally yields 4 truths, write 4. If it yields 6, write 6. Never pad to fill a quota. Never stretch one insight across multiple principles. A document with 5 principles where every one hits is stronger than a document with 10 where the middle sags. Fewer principles that go deep always beats more principles that go wide.
+
+For each principle:
 
 ## PRINCIPLE [NUMBER]: [TITLE]
 
@@ -116,7 +124,9 @@ Then structure the document as a series of numbered PRINCIPLES. For each princip
 
 **Monopoly / Market Surface Control Lens:** How does this truth relate to the elimination of alternatives? How does a single position become total surface control? Where is monopoly the endgame? This lens reveals how dominance is established, maintained, and expanded from a single point outward.
 
-**Gym / Body / Embodiment:** Real physiology. Real biomechanics. Progressive overload, hormonal systems, metabolic pathways, muscle fiber recruitment, recovery physiology. Not metaphors about "the body is like a machine." Actual mechanisms the reader experiences in the gym and in the mirror. Show the same truth operating in the body.
+**CONVERGENCE RULE for Rent-Seeking, Bottleneck, and Monopoly:** These three lenses are distinct tools. Rent-Seeking reveals how dependency is manufactured. Bottleneck reveals the unavoidable passage point. Monopoly reveals how alternatives are eliminated. When a principle genuinely produces three distinct insights through these three lenses, give each its own section. When two or all three converge on the same structural insight, MERGE them into one combined section that goes deep rather than three sections that repeat. A single deep section titled "Rent-Seeking / Bottleneck" that reveals one truth fully is stronger than three thin sections that restate the same observation. Never repeat the same insight across these three lenses within a single principle.
+
+**Gym / Body / Embodiment:** Start with something the reader has FELT — a specific sensation, a specific moment in training that is recognizable and real. Then reveal the physiological mechanism that explains WHY it happened — progressive overload, hormonal response, muscle fiber recruitment, metabolic adaptation, recovery physiology. The felt experience comes first. The mechanism comes second. Real physiology grounded in real experience. Not metaphors about "the body is like a machine." Not textbook explanations that sit dead on the page. Not generic training clichés. The reader should finish this section recognizing something that happened in their own body and understanding why.
 
 **Christian Parallel:** Specific Scripture with book, chapter, and verse. Specific analysis. Show the structural parallel between the principle and the biblical text. Name the passage. Show the mechanism. Reveal the deeper pattern operating in the text that mirrors the principle being discussed. Use Greek and Hebrew where it reveals deeper meaning.
 
@@ -130,7 +140,9 @@ Separate each principle with a horizontal rule (---).
 
 End with a ## SYNTHESIS: THE MASTER PATTERN section that weaves all principles into a unified understanding the reader can carry forward.
 
-Write a document where every paragraph earns its place. Plan your structure so every section reveals something the reader recognizes in their own life. End with a proper conclusion. A finished document is not a long document — it is a document where nothing is dead."""
+Write a document where every paragraph earns its place. Plan your structure so every section reveals something the reader recognizes in their own life. End with a proper conclusion. A finished document is not a long document — it is a document where nothing is dead.
+
+Target 50,000-80,000 characters. Documents under 50,000 may not have gone deep enough in each container. Documents over 90,000 are almost certainly carrying dead weight — paragraphs that explain rather than reveal, containers that repeat rather than advance, principles that restate rather than build. Every container must have room to unfold — multiple paragraphs, genuine revelation, the feeling of a truth being developed rather than a label being checked off. If a container is a header followed by a few sentences before the next header, the document has become a checklist. Each container should read as a flowing section that the reader moves through, not a stop on a tour. The ideal document is one where the reader finishes wanting more, not one where they stopped listening halfway through."""
 
 UMBRELLA_TERM_PROMPT_TEMPLATE = """Given the topic "{topic}", assign it to the single most fitting umbrella term.
 
