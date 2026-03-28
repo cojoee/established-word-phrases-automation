@@ -303,6 +303,8 @@ class NotionAPI:
                 results.extend(data.get("results", []))
                 has_more = data.get("has_more", False)
                 start_cursor = data.get("next_cursor")
+                if has_more:
+                    time.sleep(0.35)  # Rate limiting — Notion allows 3 req/sec
             except requests.exceptions.RequestException as e:
                 logger.error(f"Error getting block children for {block_id}: {e}")
                 break
@@ -1098,6 +1100,7 @@ class AutomationEngine:
                 ]
             }
 
+            logger.info(f"Daily compilation querying Notion for date: {today}")
             entries = self.notion.query_database(NOTION_DATABASE_ID, filter_dict, page_size=100)
 
             if not entries:
@@ -1131,10 +1134,13 @@ class AutomationEngine:
                 # Retrieve full content blocks from the Notion page
                 try:
                     blocks = self.notion.get_block_children(entry_id)
+                    logger.info(f"  Retrieved {len(blocks)} blocks for: {topic[:60]}")
                     if blocks:
                         content_md = self._blocks_to_markdown(blocks)
                         all_content += content_md
+                        logger.info(f"  Converted to {len(content_md):,} chars of markdown")
                     else:
+                        logger.warning(f"  No blocks returned for: {topic[:60]}")
                         all_content += "(Content could not be retrieved from Notion)\n\n"
                         if link:
                             all_content += f"[View on Google Drive]({link})\n\n"
@@ -1146,6 +1152,7 @@ class AutomationEngine:
 
                 all_content += "\n---\n\n"
                 compiled_count += 1
+                time.sleep(1)  # Rate limiting between documents — prevents Notion API 429 errors
 
             logger.info(f"Compiled content from {compiled_count} documents")
 
@@ -1163,11 +1170,14 @@ class AutomationEngine:
                 return
 
             filename = f"{daily_doc_title}.md"
+            logger.info(f"Uploading daily compilation to Drive: {filename} ({len(md_bytes):,} bytes) to folder {folder_id}")
             drive_link = self.drive.upload_file(md_bytes, filename, folder_id)
 
             if not drive_link:
-                logger.error("Failed to upload daily compilation")
+                logger.error("Failed to upload daily compilation to Drive")
                 return
+
+            logger.info(f"Daily compilation uploaded: {drive_link}")
 
             # Create Notion entry in Daily Documents DB
             properties = {
@@ -1178,11 +1188,12 @@ class AutomationEngine:
                 COLUMNS["DAILY_STATUS"]: {"select": {"name": "Complete"}}
             }
 
+            logger.info(f"Creating Notion entry in Daily Documents DB...")
             self.notion.create_page(DAILY_DOCUMENTS_DB_ID, properties)
-            logger.info(f"Daily compilation complete: {compiled_count} documents, full content compiled")
+            logger.info(f"Daily compilation COMPLETE: {compiled_count} documents, {len(md_bytes):,} bytes, full content compiled and uploaded")
 
         except Exception as e:
-            logger.error(f"Error in daily compilation: {e}")
+            logger.error(f"DAILY COMPILATION FAILED: {e}", exc_info=True)
 
     def compile_umbrella_term_documents(self, umbrella_term: str):
         """Compile documents for a specific umbrella term"""
