@@ -883,6 +883,13 @@ class AutomationEngine:
         self.last_run = None
         self.operation_status = "Idle"
         self.health_score = 100
+        self.last_cycle_succeeded = True
+        self.last_cycle_attempted = 0
+        self.last_cycle_succeeded_count = 0
+        self.claude_healthy = True
+        self.drive_healthy = True
+        self.notion_healthy = True
+        self.cost_month = datetime.now().strftime("%Y-%m")  # Track which month the cost belongs to
 
         # Restore counters from registry so they survive deploys
         self.monthly_cost = 0.0
@@ -897,6 +904,8 @@ class AutomationEngine:
                     self.total_processed = saved_total
                     logger.info(f"Restored total_processed from registry: {self.total_processed}")
                 if saved_cost is not None:
+                    # Reset cost if we've crossed into a new month
+                    current_month = datetime.now().strftime("%Y-%m")
                     self.monthly_cost = saved_cost
                     logger.info(f"Restored monthly_cost from registry: {self.monthly_cost}")
         except Exception as e:
@@ -950,14 +959,21 @@ class AutomationEngine:
                     logger.error(f"Error processing entry {i+1}/{attempted}: {e}")
                     self.health_score = max(0, self.health_score - 10)
 
+            # Recover health score on successful cycles
+            if succeeded == attempted and attempted > 0:
+                self.health_score = min(100, self.health_score + 10)
+            elif succeeded > 0:
+                self.health_score = min(100, self.health_score + 5)
+
             self.operation_status = "Idle"
             self._update_registry()
-            logger.info(f"Processing cycle complete. {succeeded}/{attempted} entries succeeded")
+            logger.info(f"Processing cycle complete. {succeeded}/{attempted} entries succeeded. Health: {self.health_score}")
 
         except Exception as e:
             logger.error(f"Error in processing cycle: {e}")
             self.operation_status = "Error"
             self.health_score = max(0, self.health_score - 20)
+            self._update_registry()  # Write the error state to registry so it's visible
 
     def _process_entry(self, entry: Dict, existing_terms: List[str]) -> bool:
         """Process a single entry. Returns True on success, False on failure."""
@@ -1286,17 +1302,83 @@ class AutomationEngine:
         except Exception as e:
             logger.error(f"Error in umbrella term compilation: {e}")
 
+    def _check_service_health(self):
+        """Actually test each service and return live health status."""
+        health = {}
+
+        # Check Claude API
+        try:
+            test_resp = requests.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={
+                    "x-api-key": CLAUDE_API_KEY,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json"
+                },
+                json={"model": CLAUDE_MODEL, "max_tokens": 5, "messages": [{"role": "user", "content": "ok"}]},
+                timeout=15
+            )
+            health["Claude API"] = "Healthy" if test_resp.status_code == 200 else f"Error ({test_resp.status_code})"
+        except Exception as e:
+            health["Claude API"] = f"Down ({type(e).__name__})"
+
+        # Check Google Drive — verify the service exists and can list the target folder
+        try:
+            if self.drive.service:
+                test = self.drive.service.files().get(fileId=DRIVE_FOLDER_ID, fields="id").execute()
+                health["Google Drive"] = "Healthy" if test.get("id") else "Folder Not Found"
+            else:
+                health["Google Drive"] = "Service Not Initialized"
+        except Exception as e:
+            health["Google Drive"] = f"Down ({type(e).__name__})"
+
+        # Check Notion API (we know it works if we got this far since _update_registry reads the registry page,
+        # but let's verify the main database is accessible)
+        try:
+            test_resp = requests.post(
+                f"https://api.notion.com/v1/databases/{NOTION_DATABASE_ID}/query",
+                headers=self.notion.headers,
+                json={"page_size": 1},
+                timeout=10
+            )
+            health["Notion API"] = "Healthy" if test_resp.status_code == 200 else f"Error ({test_resp.status_code})"
+        except Exception as e:
+            health["Notion API"] = f"Down ({type(e).__name__})"
+
+        return health
+
     def _update_registry(self):
-        """Update the operations registry"""
+        """Update the operations registry with live, truthful values."""
         try:
             registry_page = self.notion.get_page(REGISTRY_PAGE_ID)
             if not registry_page:
                 logger.warning("Could not find registry page")
                 return
 
+            # Reset monthly cost at month boundary
+            current_month = datetime.now().strftime("%Y-%m")
+            if current_month != self.cost_month:
+                logger.info(f"New month detected ({self.cost_month} -> {current_month}). Resetting monthly cost.")
+                self.monthly_cost = 0.0
+                self.cost_month = current_month
+
+            # Check actual service health
+            health = self._check_service_health()
+            all_healthy = all(v == "Healthy" for v in health.values())
+            health_text = " | ".join(f"{k}: {v}" for k, v in health.items())
+            health_text += f" | Health Score: {self.health_score}"
+
+            # Determine true status — uses existing Notion select options: Active, Paused, Error, Decommissioned, Setting Up
+            if self.health_score <= 0 or not all_healthy:
+                status = "Error"
+            elif self.health_score < 80:
+                status = "Paused"  # Degraded performance — needs attention
+            else:
+                status = "Active"
+
             properties = {
                 COLUMNS["REGISTRY_STATUS"]: {
-                    "select": {"name": "Active"}
+                    "select": {"name": status}
                 },
                 COLUMNS["REGISTRY_MODEL"]: {
                     "multi_select": [{"name": CLAUDE_MODEL}]
@@ -1311,7 +1393,7 @@ class AutomationEngine:
                     "number": self.total_processed
                 },
                 COLUMNS["REGISTRY_HEALTH"]: {
-                    "rich_text": [{"type": "text", "text": {"content": f"Claude API: Healthy | Google Drive: Healthy | Notion API: Healthy | Health Score: {self.health_score}"}}]
+                    "rich_text": [{"type": "text", "text": {"content": health_text}}]
                 },
                 COLUMNS["REGISTRY_FREQUENCY"]: {
                     "rich_text": [{"type": "text", "text": {"content": f"Every {PROCESSING_INTERVAL_MINUTES} minutes (BATCH_SIZE={BATCH_SIZE})"}}]
@@ -1320,7 +1402,7 @@ class AutomationEngine:
 
             success = self.notion.update_page_properties(REGISTRY_PAGE_ID, properties)
             if success:
-                logger.info("Registry updated successfully")
+                logger.info(f"Registry updated — Status: {status} | {health_text}")
             else:
                 logger.warning("Registry update returned failure")
         except Exception as e:
