@@ -204,7 +204,13 @@ COLUMNS = {
     "REGISTRY_HEALTH": "Infrastructure Health",
     "REGISTRY_LOGS": "Operation Logs",
     "REGISTRY_SCRIPT": "Google Apps Script",
-    "REGISTRY_DATABASES": "Relevant Notion Database(s)"
+    "REGISTRY_DATABASES": "Relevant Notion Database(s)",
+    "REGISTRY_CLAUDE_STATUS": "Claude API Status",
+    "REGISTRY_DRIVE_STATUS": "Google Drive Status",
+    "REGISTRY_NOTION_STATUS": "Notion API Status",
+    "REGISTRY_DOC_GEN": "Document Generation",
+    "REGISTRY_DAILY_COMP": "Daily Compilation",
+    "REGISTRY_HEALTH_SCORE": "Health Score"
 }
 
 
@@ -890,6 +896,8 @@ class AutomationEngine:
         self.drive_healthy = True
         self.notion_healthy = True
         self.cost_month = datetime.now().strftime("%Y-%m")  # Track which month the cost belongs to
+        self.last_doc_gen_status = "Awaiting first cycle"
+        self.last_daily_comp_status = "Awaiting first run"
 
         # Restore counters from registry so they survive deploys
         self.monthly_cost = 0.0
@@ -990,6 +998,7 @@ class AutomationEngine:
         content, usage = self.claude.generate_document(topic)
         if not content:
             logger.error(f"Failed to generate content for {topic}")
+            self.last_doc_gen_status = f"Failed — {topic[:60]} (Claude generation failed)"
             return False
 
         # Calculate cost
@@ -1030,6 +1039,7 @@ class AutomationEngine:
         drive_link = self.drive.upload_file(md_bytes, filename, folder_id)
         if not drive_link:
             logger.error(f"Failed to upload document for {topic}")
+            self.last_doc_gen_status = f"Failed — {topic[:60]} (Drive upload failed)"
             return False
 
         # Step 5: Update Notion entry - CRITICAL: only mark as processed after Drive upload succeeded
@@ -1059,6 +1069,7 @@ class AutomationEngine:
             time.sleep(0.5)  # Rate limiting
 
         logger.info(f"Successfully processed {topic} - Umbrella: {umbrella_term}, Cost: ${cost:.4f}")
+        self.last_doc_gen_status = f"Success — {topic[:60]} ({len(content):,} chars)"
         return True
 
     def _extract_rich_text(self, rich_text_array: List[Dict]) -> str:
@@ -1137,6 +1148,7 @@ class AutomationEngine:
 
             if not entries:
                 logger.info("No entries processed today for daily compilation")
+                self.last_daily_comp_status = f"No documents to compile ({today})"
                 return
 
             logger.info(f"Found {len(entries)} entries for daily compilation")
@@ -1222,9 +1234,11 @@ class AutomationEngine:
 
             logger.info(f"Creating Notion entry in Daily Documents DB...")
             self.notion.create_page(DAILY_DOCUMENTS_DB_ID, properties)
+            self.last_daily_comp_status = f"Complete — {compiled_count} docs ({today_display})"
             logger.info(f"Daily compilation COMPLETE: {compiled_count} documents, {len(md_bytes):,} bytes, full content compiled and uploaded")
 
         except Exception as e:
+            self.last_daily_comp_status = f"Failed — {type(e).__name__}: {str(e)[:80]}"
             logger.error(f"DAILY COMPILATION FAILED: {e}", exc_info=True)
 
     def compile_umbrella_term_documents(self, umbrella_term: str):
@@ -1397,6 +1411,24 @@ class AutomationEngine:
                 },
                 COLUMNS["REGISTRY_FREQUENCY"]: {
                     "rich_text": [{"type": "text", "text": {"content": f"Every {PROCESSING_INTERVAL_MINUTES} minutes (BATCH_SIZE={BATCH_SIZE})"}}]
+                },
+                COLUMNS["REGISTRY_CLAUDE_STATUS"]: {
+                    "rich_text": [{"type": "text", "text": {"content": health.get("Claude API", "Unknown")}}]
+                },
+                COLUMNS["REGISTRY_DRIVE_STATUS"]: {
+                    "rich_text": [{"type": "text", "text": {"content": health.get("Google Drive", "Unknown")}}]
+                },
+                COLUMNS["REGISTRY_NOTION_STATUS"]: {
+                    "rich_text": [{"type": "text", "text": {"content": health.get("Notion API", "Unknown")}}]
+                },
+                COLUMNS["REGISTRY_DOC_GEN"]: {
+                    "rich_text": [{"type": "text", "text": {"content": self.last_doc_gen_status[:200]}}]
+                },
+                COLUMNS["REGISTRY_DAILY_COMP"]: {
+                    "rich_text": [{"type": "text", "text": {"content": self.last_daily_comp_status[:200]}}]
+                },
+                COLUMNS["REGISTRY_HEALTH_SCORE"]: {
+                    "number": self.health_score
                 }
             }
 
