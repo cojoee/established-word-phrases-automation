@@ -613,32 +613,52 @@ class GoogleDriveAPI:
             return None
 
     def upload_file(self, file_content: bytes, filename: str, folder_id: str) -> Optional[str]:
-        """Upload file to Drive"""
+        """Upload file to Drive. Retries once on failure with token refresh."""
         if not self.service:
             logger.warning("Google Drive service not initialized")
             return None
 
-        try:
-            file_metadata = {'name': filename, 'parents': [folder_id]}
-            media = MediaIoBaseUpload(BytesIO(file_content), mimetype='text/markdown')
+        for attempt in range(2):
+            try:
+                file_metadata = {'name': filename, 'parents': [folder_id]}
+                media = MediaIoBaseUpload(BytesIO(file_content), mimetype='text/markdown')
 
-            file = self.service.files().create(
-                body=file_metadata,
-                media_body=media,
-                fields='id, webViewLink'
-            ).execute()
+                file = self.service.files().create(
+                    body=file_metadata,
+                    media_body=media,
+                    fields='id, webViewLink'
+                ).execute()
 
-            file_id = file.get('id')
-            file_link = file.get('webViewLink')
+                file_id = file.get('id')
+                file_link = file.get('webViewLink')
 
-            if file_id:
-                self._set_file_sharing(file_id)
+                if file_id:
+                    self._set_file_sharing(file_id)
 
-            logger.info(f"Uploaded {filename} to Drive: {file_link}")
-            return file_link
-        except Exception as e:
-            logger.error(f"Error uploading {filename} to Drive: {e}")
-            return None
+                logger.info(f"Uploaded {filename} to Drive: {file_link}")
+                return file_link
+            except Exception as e:
+                logger.error(f"Error uploading {filename} to Drive (attempt {attempt + 1}/2): {e}")
+                if attempt == 0:
+                    # Retry: rebuild credentials and service
+                    try:
+                        logger.info("Refreshing Drive credentials and retrying...")
+                        credentials = OAuthCredentials(
+                            token=None,
+                            refresh_token=self.refresh_token,
+                            token_uri='https://oauth2.googleapis.com/token',
+                            client_id=self.client_id,
+                            client_secret=self.client_secret,
+                            scopes=['https://www.googleapis.com/auth/drive']
+                        )
+                        credentials.refresh(GoogleAuthRequest())
+                        self.service = build('drive', 'v3', credentials=credentials)
+                        logger.info("Drive service rebuilt successfully")
+                        time.sleep(2)
+                    except Exception as refresh_error:
+                        logger.error(f"Failed to refresh Drive credentials: {refresh_error}")
+                        return None
+        return None
 
     def _set_file_sharing(self, file_id: str):
         """Set file to be shareable via link"""
@@ -1121,11 +1141,24 @@ class AutomationEngine:
                 continue
         return "\n".join(lines)
 
+    def _update_daily_comp_status(self, status: str):
+        """Write daily compilation status to registry immediately so it's visible even if function crashes."""
+        self.last_daily_comp_status = status
+        try:
+            self.notion.update_page_properties(REGISTRY_PAGE_ID, {
+                COLUMNS["REGISTRY_DAILY_COMP"]: {
+                    "rich_text": [{"type": "text", "text": {"content": status[:200]}}]
+                }
+            })
+        except Exception:
+            pass  # Don't let status update failure crash the compilation
+
     def compile_daily_documents(self):
         """Compile daily documents - run at 11:55 PM.
         Retrieves the FULL CONTENT of every document processed today from Notion
         and compiles it into one continuous markdown file for ElevenReader consumption."""
         logger.info("Starting daily compilation...")
+        self._update_daily_comp_status("Running — querying Notion...")
 
         try:
             # Query entries processed today
@@ -1148,10 +1181,11 @@ class AutomationEngine:
 
             if not entries:
                 logger.info("No entries processed today for daily compilation")
-                self.last_daily_comp_status = f"No documents to compile ({today})"
+                self._update_daily_comp_status(f"No documents to compile ({today})")
                 return
 
             logger.info(f"Found {len(entries)} entries for daily compilation")
+            self._update_daily_comp_status(f"Running — found {len(entries)} entries, compiling...")
 
             # Format the date: "February 17, 2026"
             today_display = datetime.now().strftime("%B %d, %Y").replace(" 0", " ")  # Remove leading zero from day
@@ -1199,6 +1233,7 @@ class AutomationEngine:
                 time.sleep(1)  # Rate limiting between documents — prevents Notion API 429 errors
 
             logger.info(f"Compiled content from {compiled_count} documents")
+            self._update_daily_comp_status(f"Running — {compiled_count} docs compiled, uploading to Drive...")
 
             # Sanitize for ElevenReader compatibility
             all_content = DocumentBuilder.sanitize_for_compatibility(all_content)
@@ -1211,6 +1246,7 @@ class AutomationEngine:
             folder_id = DAILY_DRIVE_FOLDER_ID if DAILY_DRIVE_FOLDER_ID else self.drive.find_folder(DAILY_DRIVE_FOLDER_NAME)
             if not folder_id:
                 logger.error(f"Could not find Drive folder {DAILY_DRIVE_FOLDER_NAME}")
+                self._update_daily_comp_status(f"Failed — Drive folder not found")
                 return
 
             filename = f"{daily_doc_title}.md"
@@ -1219,9 +1255,11 @@ class AutomationEngine:
 
             if not drive_link:
                 logger.error("Failed to upload daily compilation to Drive")
+                self._update_daily_comp_status(f"Failed — Drive upload returned no link ({len(md_bytes):,} bytes, {compiled_count} docs)")
                 return
 
             logger.info(f"Daily compilation uploaded: {drive_link}")
+            self._update_daily_comp_status(f"Running — uploaded to Drive, creating Notion entry...")
 
             # Create Notion entry in Daily Documents DB
             properties = {
@@ -1234,11 +1272,11 @@ class AutomationEngine:
 
             logger.info(f"Creating Notion entry in Daily Documents DB...")
             self.notion.create_page(DAILY_DOCUMENTS_DB_ID, properties)
-            self.last_daily_comp_status = f"Complete — {compiled_count} docs ({today_display})"
+            self._update_daily_comp_status(f"Complete — {compiled_count} docs ({today_display})")
             logger.info(f"Daily compilation COMPLETE: {compiled_count} documents, {len(md_bytes):,} bytes, full content compiled and uploaded")
 
         except Exception as e:
-            self.last_daily_comp_status = f"Failed — {type(e).__name__}: {str(e)[:80]}"
+            self._update_daily_comp_status(f"Failed — {type(e).__name__}: {str(e)[:80]}")
             logger.error(f"DAILY COMPILATION FAILED: {e}", exc_info=True)
 
     def compile_umbrella_term_documents(self, umbrella_term: str):
