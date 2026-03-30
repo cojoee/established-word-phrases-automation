@@ -166,23 +166,21 @@ UMBRELLA_TERM_PROMPT_TEMPLATE = """Given the topic "{topic}", assign it to the s
 
 EXISTING ESTABLISHED UMBRELLA TERMS: {terms_list}
 
+Think structurally. The umbrella term is a container — a domain of human knowledge and practice that this topic naturally lives inside. Not what the topic IS, but what FIELD the topic belongs to. A document about "Fernand Braudel" belongs under "Historiography" because Braudel IS a historian — the field is the container, not the person. A document about "Rite of Passage" belongs under "Esotericism" or "Embodiment" because rites of passage are structures of transformation — the structural domain is the container.
+
 RULES:
-1. FIRST — Check if the topic genuinely belongs under an existing term. Use an existing term if the topic is a natural member, instance, or expression of that umbrella. Most topics SHOULD fit under an existing term. Default to existing terms.
-2. ONLY IF NO EXISTING TERM FITS — Establish a new umbrella term. It must be:
-   - A genuine hypernym, holonym, or container word (1-2 words maximum)
-   - A real word with real meaning and essence, not an academic department name
-   - Specific enough to be meaningful (NEVER use: "Knowledge", "Study", "Learning", "Wisdom", "Truth", "Philosophy", "Science", "Culture", "History", "Ideas")
-   - Broad enough that other related topics could naturally sit under it too
-   - The kind of word where if you said it, a person would immediately picture the domain it contains
-3. ANTI-DRIFT RULES:
-   - Do NOT create a new term when an existing one works. Check each existing term carefully.
-   - Do NOT collapse unrelated topics into the same term just because it is broad.
-   - Do NOT create a term that only one topic could ever belong to (too atomic).
-   - Do NOT use multi-word academic phrases like "Comparative Religion" or "Political Theory".
-   - Each term should feel like a real container with real contents, not a label slapped on.
-   - If uncertain between two existing terms, choose the one where the topic is MORE CENTRALLY a member.
-4. GOOD examples: Divination, Consciousness, Transmutation, Hermeticism, Scripture, Embodiment, Rhetoric, Craft, Media
-5. BAD examples: Ancient Wisdom, Spiritual Studies, Esoteric Knowledge, Human Experience, Deep Understanding
+1. FIRST — Check every existing term. Most topics SHOULD fit under an existing term. If the topic is a natural member, instance, expression, practitioner, concept, or artifact of an existing umbrella — use that existing term. Default to existing terms. Do not create new terms when an existing one works.
+2. ONLY IF NO EXISTING TERM GENUINELY FITS — Establish a new umbrella term. It must be:
+   - A genuine domain word (1-2 words maximum) — not a topic label, not a description
+   - A real word with real meaning — the kind of word where if you said it, a person would immediately picture the domain it contains
+   - Specific enough that not every topic fits under it
+   - Broad enough that at least 20-50 other topics could naturally belong under it too
+   - NEVER use: "Knowledge", "Study", "Learning", "Wisdom", "Truth", "Philosophy", "Science", "Culture", "History", "Ideas", "Spirituality", "Religion", "Psychology" (too broad — everything fits)
+   - NEVER use multi-word academic phrases like "Comparative Religion" or "Political Theory"
+3. ANTI-DRIFT:
+   - If uncertain between two existing terms, choose the one where the topic is MORE CENTRALLY a member — where the topic is a core example of that domain, not a peripheral one.
+   - Do NOT create a term that only this one topic could ever belong to.
+   - Each term should feel like a real library section with real books in it.
 
 Respond with ONLY the umbrella term. Nothing else. No explanation, no quotes, no punctuation. Just the term."""
 
@@ -277,6 +275,17 @@ class NotionAPI:
                 break
 
         return results
+
+    def get_database(self, database_id: str) -> Dict:
+        """Get database schema (properties, options, etc.)"""
+        url = f"{self.base_url}/databases/{database_id}"
+        try:
+            response = requests.get(url, headers=self.headers)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error getting database {database_id}: {e}")
+            return {}
 
     def get_page(self, page_id: str) -> Dict:
         """Get a single page"""
@@ -987,8 +996,16 @@ class AutomationEngine:
 
             logger.info(f"Found {len(entries)} unprocessed entries, processing up to {BATCH_SIZE}")
 
-            # Get existing umbrella terms (use seed terms + cached terms to avoid querying entire DB)
-            existing_terms = list(set(SEED_UMBRELLA_TERMS))
+            # Get ALL existing umbrella terms from the database schema (select field options)
+            try:
+                db_schema = self.notion.get_database(NOTION_DATABASE_ID)
+                umbrella_prop = db_schema.get("properties", {}).get(COLUMNS["UMBRELLA_TERM"], {})
+                schema_terms = [opt.get("name") for opt in umbrella_prop.get("select", {}).get("options", []) if opt.get("name")]
+                existing_terms = list(set(SEED_UMBRELLA_TERMS + schema_terms))
+                logger.info(f"Umbrella terms available: {len(existing_terms)} ({len(schema_terms)} from DB, {len(SEED_UMBRELLA_TERMS)} seed)")
+            except Exception as e:
+                logger.warning(f"Could not fetch umbrella terms from DB schema: {e}. Using seed terms only.")
+                existing_terms = list(set(SEED_UMBRELLA_TERMS))
 
             # Process each entry
             attempted = min(len(entries), BATCH_SIZE)
