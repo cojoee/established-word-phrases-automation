@@ -115,21 +115,35 @@ Some Parts may have a brief contextual paragraph between the Part heading and th
 
 Within each Part, write numbered PRINCIPLES or CORE TRUTHS. The label can vary naturally: "## PRINCIPLE 1: THE BOTTLENECK IS THE BUSINESS" or "## CORE TRUTH #1: CAUSALITY BEGINS WITHIN" or "## FOUNDATIONAL TRUTH I: THE HIDDEN OBSERVER IS ALWAYS PRESENT." Choose the label that fits the source material's character. The title after the number must be a standalone truth — not a topic label but a sentence that hits: "THE BOTTLENECK IS THE BUSINESS," "CAUSALITY BEGINS WITHIN," "CREATION WITHOUT CONTAINMENT IS ENTROPY." If someone read only the principle titles, they would carry away truths worth carrying. Use between 4 and 7 principles total per document. Each principle must earn its existence by revealing a genuinely distinct operating truth.
 
-FOR EACH PRINCIPLE, use this exact internal sequence — seven sections, each ONE PARAGRAPH:
+FOR EACH PRINCIPLE, follow this internal sequence:
 
-**Core Truth:** Bold, compressed, 1-2 sentences. The principle in its most essential form.
+**Core Truth:** Bold, compressed, 1-2 sentences maximum. The principle compressed into its most essential form — the fewest words that carry the full truth. If the reader read only this sentence, they would carry something worth carrying.
 
-**Pattern Recognition:** One paragraph. Declare where this truth operates — list multiple concrete instances across domains showing the same pattern in different material. The truth is the subject of the sentence. The examples are the proof. Use "The medium changes. The pattern is identical."
+**The Principle:** 2-3 paragraphs expanding the Core Truth. Declare what IS true. Show the mechanism. Use concrete examples before naming the abstract pattern. Use "This is not X — it is Y" to correct assumed understanding.
 
-**Earthwalker / Builder Lens:** One paragraph. Speak directly to the reader's business model — cloning formats, redirecting traffic, monetization infrastructure. Apply the principle to their specific operations with strategic intelligence that reframes how they see their own model. When rent-seeking dynamics, bottleneck positioning, monopoly structures, or flow of money are relevant, weave them in. Name the reader's acts: "When you clone a brand..." "Your monetization point is..."
+**Pattern and Function:** One paragraph. Pattern names WHERE this truth operates across domains — list multiple instances showing the same structure in different material. Function names WHAT the pattern does with a single word first (amplification, extraction, constraint, investment, navigation, filtration, preservation), then explains that function in 2-3 sentences.
 
-**Gym / Body Parallel:** One paragraph. Apply the principle to the body — training, physiology, muscle development. Name specific mechanisms when they illuminate (hormones, metabolic processes, nervous system adaptation). Show structural identity: the truth governing the business governs the body.
+**Embodiment:** One paragraph. How does a human being physically live this truth across all domains? "You embody this when you..." Use imperative language. This is the principle made behavioral before being split into domain-specific lenses.
 
-**Christian Parallel:** One paragraph. Cite specific Scripture with book, chapter, verse. Quote the passage. Then show the structural mechanism — not moral application but structural revelation. Use Greek or Hebrew when it reveals deeper meaning. Read Scripture as a builder reads a blueprint.
+**Wisdom:** One paragraph. The compressed, aphoristic crystallization — the sentence the reader carries out of this section. Bold the key sentence. This is the quotable line. "Read the field before you plant." "The vessel is the difference between utility and waste." "Behavior follows identity. Not goal. Not motivation. Not willpower. Identity."
 
-**Psychological Parallel:** One paragraph. Name the specific psychologist and theory. Explain how the mechanism works. Show it is the same mechanism as the principle. The reader should recognize this truth in their own behavior.
+Then deliver the LENS APPLICATIONS in this order:
 
-**Insight:** One paragraph. The closing compression. Give the reader a way to see what they couldn't see before and something to carry forward — a transferable operating rule, a vivid image, a diagnostic question, or a reframing that changes how they look at something they encounter daily. The very last sentence should land as the image or the rule itself — not an instruction to "go do X." The insight does the final work.
+**Earthwalker / Builder Lens:** ALWAYS FIRST. ALWAYS THE LONGEST — 3-6 paragraphs. Speak directly to the reader's business model: cloning formats, redirecting traffic, building monetization infrastructure, lists, backends, offer architectures. Begin by VALIDATING the reader's existing strategy — show them that what they are already doing is an expression of this principle ("Your strategy is instinctively aligned with this truth. You recognized that you don't need to invent — you need to occupy and build above."). Then go past analogy to IMPLEMENTATION. Show the reader what this principle means for their specific business operations — not as a numbered task list, but as strategic intelligence that reframes how they see their own model. When rent-seeking dynamics, bottleneck positioning, monopoly structures, information asymmetry, or flow of money are relevant, weave them into this lens — they are strategic intelligence applied to the builder's reality, not separate sections. Name the reader's acts: "When you clone a brand..." "Your email list is..." "Your monetization architecture..."
+
+**Gym / Body Lens:** 2-4 paragraphs. Start with something the reader has FELT — a real sensation, a real training moment. Then reveal the physiological mechanism. Name specific terms when they illuminate: hormones (testosterone, IGF-1, cortisol, growth hormone), processes (protein synthesis, anabolic signaling, motor unit recruitment, neurological efficiency), systems (nervous system, endocrine system, cardiovascular). Show structural identity: the truth governing the business governs the body identically.
+
+**Christian Parallel:** 1-3 paragraphs. Cite specific Scripture with book, chapter, verse. Quote the passage directly. Then show the structural mechanism — read Scripture as a builder reads a blueprint, for the mechanism, not the sentiment. Not "this teaches us to be good" but "this IS the same pattern operating in the architecture of redemption." Use Greek or Hebrew word study when it reveals structural meaning (enkrateia, lev, metamorphoo, menō). Sometimes invert the pattern — show how Christ's operation reverses the extraction/dependency mechanism the principle describes.
+
+**Psychological Parallel:** 1-2 paragraphs. Name the specific psychologist and theory. Go beyond naming — explain HOW the mechanism works, then show it is the same mechanism as the principle. Prefer lesser-known, more structurally revealing references over overused defaults. The reader should recognize the psychological truth in their own behavior.
+
+**Insight Through Parallel:** The closing synthesis. 1-2 paragraphs. Deliver a vivid METAPHOR that crystallizes the entire principle into one image the reader carries forward — an iceberg, a casino, a solar system, a surfer reading the swell, a field being read, a captain navigating an ocean. The metaphor is the principle compressed into a picture. Explicitly map the metaphor's elements back to the principle's components: "The ocean floor is the longue durée. The swell is the conjuncture. The foam is event-time." Use language the reader already uses and thinks in. Connect the metaphor back to the reader's specific world. The very last sentence of the Insight Through Parallel must be the image itself — not an imperative, not a command, not "do this," not "become this." The image does the final work. The reader carries the picture, not an instruction.
+
+When the topic naturally calls for it, include additional lenses within any Principle:
+- **Lover Lens:** The person in intimate relationship — how this truth operates in the domain of love, desire, trust, vulnerability, and human connection. 1-2 paragraphs.
+- **Human Parallel / Plain English:** The principle restated in everyday human experience — no academic framing, no theory names, just recognizable lived human behavior.
+- **English Language Parallel:** When a word's etymology or grammatical structure reveals the principle operating within the language itself.
+These additional lenses appear only when they genuinely illuminate — they are not required in every principle.
 
 Separate each principle with a horizontal rule (---).
 
