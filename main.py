@@ -687,6 +687,19 @@ class GoogleDriveAPI:
                         return None
         return None
 
+    def download_file(self, file_id: str) -> Optional[bytes]:
+        """Download file content from Drive by file ID."""
+        if not self.service:
+            logger.warning("Google Drive service not initialized")
+            return None
+        try:
+            request = self.service.files().get_media(fileId=file_id)
+            content = request.execute()
+            return content
+        except Exception as e:
+            logger.error(f"Error downloading file {file_id}: {e}")
+            return None
+
     def _set_file_sharing(self, file_id: str):
         """Set file to be shareable via link"""
         if not self.service:
@@ -1190,8 +1203,8 @@ class AutomationEngine:
 
     def compile_daily_documents(self):
         """Compile daily documents - run at 11:55 PM.
-        Retrieves the FULL CONTENT of every document processed today from Notion
-        and compiles it into one continuous markdown file for ElevenReader consumption."""
+        Downloads the actual markdown files from Google Drive for each document
+        processed today and compiles them into one continuous file for ElevenReader."""
         logger.info("Starting daily compilation...")
         self._update_daily_comp_status("Running — querying Notion...")
 
@@ -1220,52 +1233,54 @@ class AutomationEngine:
                 return
 
             logger.info(f"Found {len(entries)} entries for daily compilation")
-            self._update_daily_comp_status(f"Running — found {len(entries)} entries, compiling...")
+            self._update_daily_comp_status(f"Running — found {len(entries)} entries, downloading from Drive...")
 
-            # Format the date: "February 17, 2026"
-            today_display = datetime.now().strftime("%B %d, %Y").replace(" 0", " ")  # Remove leading zero from day
-            daily_doc_title = f"📅 Established Daily Document — {today_display}"
+            # Format the date
+            today_display = datetime.now().strftime("%B %d, %Y").replace(" 0", " ")
+            daily_doc_title = f"Established Daily Document -- {today_display}"
 
-            # Compile all documents — full content from each Notion page
+            # Compile all documents by downloading markdown directly from Google Drive
             all_content = f"# {daily_doc_title}\n\n**Documents Compiled:** {len(entries)}\n\n---\n\n"
 
             compiled_count = 0
             for entry in entries:
                 topic = self.notion.get_property_value(entry, COLUMNS["TITLE"])
                 link = self.notion.get_property_value(entry, COLUMNS["LINK"])
-                entry_id = entry["id"]
 
-                if not topic:
+                if not topic or not link:
                     continue
 
-                logger.info(f"Compiling content for: {topic}")
+                logger.info(f"Downloading from Drive: {topic[:60]}")
 
-                # Add topic header
-                all_content += f"# 🧠 Established Truth, Principles of {topic}\n\n"
-                all_content += f"**Original Topic:** {topic}\n\n"
+                # Extract file ID from the Drive link
+                file_id = None
+                if link and "/d/" in link:
+                    file_id = link.split("/d/")[1].split("/")[0]
 
-                # Retrieve full content blocks from the Notion page
-                try:
-                    blocks = self.notion.get_block_children(entry_id)
-                    logger.info(f"  Retrieved {len(blocks)} blocks for: {topic[:60]}")
-                    if blocks:
-                        content_md = self._blocks_to_markdown(blocks)
-                        all_content += content_md
-                        logger.info(f"  Converted to {len(content_md):,} chars of markdown")
-                    else:
-                        logger.warning(f"  No blocks returned for: {topic[:60]}")
-                        all_content += "(Content could not be retrieved from Notion)\n\n"
-                        if link:
-                            all_content += f"[View on Google Drive]({link})\n\n"
-                except Exception as e:
-                    logger.error(f"Error retrieving content for {topic}: {e}")
-                    all_content += "(Content could not be retrieved from Notion)\n\n"
-                    if link:
-                        all_content += f"[View on Google Drive]({link})\n\n"
+                if file_id:
+                    try:
+                        file_bytes = self.drive.download_file(file_id)
+                        if file_bytes:
+                            # Decode the markdown content
+                            file_text = file_bytes.decode("utf-8-sig", errors="replace")
+                            all_content += file_text
+                            all_content += "\n\n---\n\n"
+                            compiled_count += 1
+                            logger.info(f"  Downloaded: {len(file_text):,} chars")
+                        else:
+                            logger.warning(f"  Download returned empty for: {topic[:60]}")
+                            all_content += f"# Established Truth, Principles of {topic}\n\n(Content could not be downloaded from Drive)\n\n---\n\n"
+                            compiled_count += 1
+                    except Exception as e:
+                        logger.error(f"  Error downloading {topic[:60]}: {e}")
+                        all_content += f"# Established Truth, Principles of {topic}\n\n(Download error: {e})\n\n---\n\n"
+                        compiled_count += 1
+                else:
+                    logger.warning(f"  No valid Drive file ID for: {topic[:60]}")
+                    all_content += f"# Established Truth, Principles of {topic}\n\n(No Drive link available)\n\n---\n\n"
+                    compiled_count += 1
 
-                all_content += "\n---\n\n"
-                compiled_count += 1
-                time.sleep(1)  # Rate limiting between documents — prevents Notion API 429 errors
+                time.sleep(0.5)  # Brief pause between downloads
 
             logger.info(f"Compiled content from {compiled_count} documents")
             self._update_daily_comp_status(f"Running — {compiled_count} docs compiled, uploading to Drive...")
@@ -1277,7 +1292,7 @@ class AutomationEngine:
             content_with_bom = '\ufeff' + all_content
             md_bytes = content_with_bom.encode('utf-8')
 
-            # Upload to Drive — use direct folder ID if set, otherwise search by name
+            # Upload to Drive
             folder_id = DAILY_DRIVE_FOLDER_ID if DAILY_DRIVE_FOLDER_ID else self.drive.find_folder(DAILY_DRIVE_FOLDER_NAME)
             if not folder_id:
                 logger.error(f"Could not find Drive folder {DAILY_DRIVE_FOLDER_NAME}")
@@ -1285,16 +1300,16 @@ class AutomationEngine:
                 return
 
             filename = f"{daily_doc_title}.md"
-            logger.info(f"Uploading daily compilation to Drive: {filename} ({len(md_bytes):,} bytes) to folder {folder_id}")
+            logger.info(f"Uploading daily compilation: {filename} ({len(md_bytes):,} bytes)")
             drive_link = self.drive.upload_file(md_bytes, filename, folder_id)
 
             if not drive_link:
-                logger.error("Failed to upload daily compilation to Drive")
+                logger.error("Failed to upload daily compilation")
                 self._update_daily_comp_status(f"Failed — Drive upload returned no link ({len(md_bytes):,} bytes, {compiled_count} docs)")
                 return
 
             logger.info(f"Daily compilation uploaded: {drive_link}")
-            self._update_daily_comp_status(f"Running — uploaded to Drive, creating Notion entry...")
+            self._update_daily_comp_status(f"Running — uploaded, creating Notion entry...")
 
             # Create Notion entry in Daily Documents DB
             properties = {
@@ -1308,7 +1323,7 @@ class AutomationEngine:
             logger.info(f"Creating Notion entry in Daily Documents DB...")
             self.notion.create_page(DAILY_DOCUMENTS_DB_ID, properties)
             self._update_daily_comp_status(f"Complete — {compiled_count} docs ({today_display})")
-            logger.info(f"Daily compilation COMPLETE: {compiled_count} documents, {len(md_bytes):,} bytes, full content compiled and uploaded")
+            logger.info(f"Daily compilation COMPLETE: {compiled_count} documents, {len(md_bytes):,} bytes")
 
         except Exception as e:
             self._update_daily_comp_status(f"Failed — {type(e).__name__}: {str(e)[:80]}")
