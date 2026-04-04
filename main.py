@@ -136,7 +136,10 @@ COLUMNS = {
     "REGISTRY_NOTION_STATUS": "Notion API Status",
     "REGISTRY_DOC_GEN": "Document Generation",
     "REGISTRY_DAILY_COMP": "Daily Compilation",
-    "REGISTRY_HEALTH_SCORE": "Health Score"
+    "REGISTRY_HEALTH_SCORE": "Health Score",
+    "REGISTRY_REMAINING": "Topics Remaining",
+    "REGISTRY_EST_DAYS": "Estimated Days to Complete",
+    "REGISTRY_DOCS_PER_DAY": "Documents Per Day"
 }
 
 
@@ -1427,6 +1430,15 @@ class AutomationEngine:
                 },
                 COLUMNS["REGISTRY_HEALTH_SCORE"]: {
                     "number": self.health_score
+                },
+                COLUMNS["REGISTRY_REMAINING"]: {
+                    "number": max(0, 5029 - self.total_processed)
+                },
+                COLUMNS["REGISTRY_DOCS_PER_DAY"]: {
+                    "number": int(1440 / PROCESSING_INTERVAL_MINUTES) * BATCH_SIZE
+                },
+                COLUMNS["REGISTRY_EST_DAYS"]: {
+                    "number": int(max(0, 5029 - self.total_processed) / max(1, int(1440 / PROCESSING_INTERVAL_MINUTES) * BATCH_SIZE))
                 }
             }
 
