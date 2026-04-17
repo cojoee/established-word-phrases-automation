@@ -155,14 +155,16 @@ class NotionAPI:
             "Content-Type": "application/json"
         }
 
-    def query_database(self, database_id: str, filter_dict: Optional[Dict] = None, page_size: int = 100, max_results: int = 0) -> List[Dict]:
-        """Query a Notion database with optional filtering.
+    def query_database(self, database_id: str, filter_dict: Optional[Dict] = None, page_size: int = 100, max_results: int = 0, sorts: Optional[List[Dict]] = None) -> List[Dict]:
+        """Query a Notion database with optional filtering and sorting.
         If max_results > 0, stop after collecting that many results (avoids paginating entire DB).
         """
         url = f"{self.base_url}/databases/{database_id}/query"
         payload = {"page_size": min(page_size, 100)}
         if filter_dict:
             payload["filter"] = filter_dict
+        if sorts:
+            payload["sorts"] = sorts
 
         results = []
         has_more = True
@@ -913,7 +915,9 @@ class AutomationEngine:
                 ]
             }
 
-            entries = self.notion.query_database(NOTION_DATABASE_ID, filter_dict, page_size=BATCH_SIZE, max_results=BATCH_SIZE)
+            # Sort by created_time descending — newest unprocessed entry first
+            sorts = [{"timestamp": "created_time", "direction": "descending"}]
+            entries = self.notion.query_database(NOTION_DATABASE_ID, filter_dict, page_size=BATCH_SIZE, max_results=BATCH_SIZE, sorts=sorts)
 
             if not entries:
                 logger.info("No unprocessed entries found")
